@@ -648,7 +648,7 @@
             display: grid;
 
             grid-template-columns:
-                repeat(2, 1fr);
+                repeat(auto-fit, minmax(280px, 1fr));
 
             gap: 20px;
 
@@ -1103,40 +1103,10 @@
         </div>
 
 
-        <div class="player-list">
-
-            <div
-                id="hostPlayer1"
-                class="player-item"
-            >
-
-                <span>
-                    Player 1
-                </span>
-
-                <span class="waiting">
-                    Waiting...
-                </span>
-
-            </div>
-
-
-            <div
-                id="hostPlayer2"
-                class="player-item"
-            >
-
-                <span>
-                    Player 2
-                </span>
-
-                <span class="waiting">
-                    Waiting...
-                </span>
-
-            </div>
-
-        </div>
+        <div
+            id="hostPlayerList"
+            class="player-list"
+        ></div>
 
 
         <button
@@ -1189,40 +1159,10 @@
         </div>
 
 
-        <div class="player-list">
-
-            <div
-                id="participantPlayer1"
-                class="player-item"
-            >
-
-                <span>
-                    Player 1
-                </span>
-
-                <span class="waiting">
-                    Waiting...
-                </span>
-
-            </div>
-
-
-            <div
-                id="participantPlayer2"
-                class="player-item"
-            >
-
-                <span>
-                    Player 2
-                </span>
-
-                <span class="waiting">
-                    Waiting...
-                </span>
-
-            </div>
-
-        </div>
+        <div
+            id="participantPlayerList"
+            class="player-list"
+        ></div>
 
 
         <div class="info-box">
@@ -1418,122 +1358,10 @@
         </div>
 
 
-        <div class="host-scoreboard">
-
-
-            <!-- PLAYER 1 -->
-
-            <div class="score-card">
-
-                <div
-                    id="hostScoreName1"
-                    class="score-name"
-                >
-                    Player 1
-                </div>
-
-
-                <div
-                    id="hostRoundScore1"
-                    class="score-value"
-                >
-                    — / 100
-                </div>
-
-
-                <div class="total-value">
-
-                    Total:
-
-                    <strong
-                        id="hostTotalScore1"
-                    >
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div
-                    id="hostStatus1"
-                    class="status"
-                >
-                    Waiting...
-
-                </div>
-
-
-                <div class="track">
-
-                    <div
-                        id="car1"
-                        class="car"
-                    >
-                        🏎️
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- PLAYER 2 -->
-
-            <div class="score-card">
-
-                <div
-                    id="hostScoreName2"
-                    class="score-name"
-                >
-                    Player 2
-                </div>
-
-
-                <div
-                    id="hostRoundScore2"
-                    class="score-value"
-                >
-                    — / 100
-                </div>
-
-
-                <div class="total-value">
-
-                    Total:
-
-                    <strong
-                        id="hostTotalScore2"
-                    >
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div
-                    id="hostStatus2"
-                    class="status"
-                >
-                    Waiting...
-
-                </div>
-
-
-                <div class="track">
-
-                    <div
-                        id="car2"
-                        class="car"
-                    >
-                        🏎️
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
+        <div
+            id="hostScoreboard"
+            class="host-scoreboard"
+        ></div>
 
 
         <div class="host-controls">
@@ -1671,31 +1499,7 @@
     PLAYERS
     ========================================================= */
 
-    let players = {
-
-        player1: {
-
-            id: null,
-            name: "",
-            score: 0,
-            total: 0,
-            position: 0,
-            submitted: false
-
-        },
-
-        player2: {
-
-            id: null,
-            name: "",
-            score: 0,
-            total: 0,
-            position: 0,
-            submitted: false
-
-        }
-
-    };
+    let players = {};
 
 
     /* =========================================================
@@ -2535,142 +2339,61 @@
 
     function applyScoreState(state) {
 
-        if (!state) {
-            return;
-        }
-
-
-        if (state.roomCode) {
-
-            roomCode =
-                state.roomCode;
-        }
-
-
-        if (
-            Number.isInteger(
-                state.currentRound
-            )
-        ) {
-
-            currentRound =
-                state.currentRound;
-        }
-
-
-        if (state.players) {
-
-            if (
-                state.players.player1
-            ) {
-
-                players.player1 = {
-
-                    id:
-                        state.players.player1.id,
-
-                    name:
-                        state.players.player1.name,
-
-                    score:
-                        Number(
-                            state.players.player1.score
-                        ) || 0,
-
-                    total:
-                        Number(
-                            state.players.player1.total
-                        ) || 0,
-
-                    position:
-                        Number(
-                            state.players.player1.position
-                        ) || 0,
-
-                    submitted:
-                        Boolean(
-                            state.players.player1.submitted
-                        )
-
-                };
-
-            } else {
-
-                players.player1 = {
-
-                    id: null,
-                    name: "",
-                    score: 0,
-                    total: 0,
-                    position: 0,
-                    submitted: false
-
-                };
-            }
-
-
-            if (
-                state.players.player2
-            ) {
-
-                players.player2 = {
-
-                    id:
-                        state.players.player2.id,
-
-                    name:
-                        state.players.player2.name,
-
-                    score:
-                        Number(
-                            state.players.player2.score
-                        ) || 0,
-
-                    total:
-                        Number(
-                            state.players.player2.total
-                        ) || 0,
-
-                    position:
-                        Number(
-                            state.players.player2.position
-                        ) || 0,
-
-                    submitted:
-                        Boolean(
-                            state.players.player2.submitted
-                        )
-
-                };
-
-            } else {
-
-                players.player2 = {
-
-                    id: null,
-                    name: "",
-                    score: 0,
-                    total: 0,
-                    position: 0,
-                    submitted: false
-
-                };
-            }
-        }
-
-
-        if (
-            role ===
-            "host"
-        ) {
-
-            updateHostGame();
-
-        } else {
-
-            updateParticipantLeaderboard();
-        }
+    if (!state) {
+        return;
     }
+
+    if (state.roomCode) {
+        roomCode = state.roomCode;
+    }
+
+    if (Number.isInteger(state.currentRound)) {
+        currentRound = state.currentRound;
+    }
+
+    if (state.players) {
+
+        players = {};
+
+        Object.entries(state.players).forEach(
+            ([slot, player]) => {
+
+                if (!player) {
+                    return;
+                }
+
+                players[slot] = {
+
+                    id: player.id,
+
+                    name: player.name,
+
+                    score:
+                        Number(player.score) || 0,
+
+                    total:
+                        Number(player.total) || 0,
+
+                    position:
+                        Number(player.position) || 0,
+
+                    submitted:
+                        Boolean(player.submitted)
+
+                };
+            }
+        );
+    }
+
+    if (role === "host") {
+
+        updateHostGame();
+
+    } else {
+
+        updateParticipantLeaderboard();
+    }
+}
 
 
     /* =========================================================
@@ -2679,115 +2402,100 @@
 
     function updateLobby(state) {
 
-        if (!state) {
-            return;
-        }
-
-
-        const p1 =
-            state.players.player1;
-
-
-        const p2 =
-            state.players.player2;
-
-
-        updateLobbyPlayer(
-            "hostPlayer1",
-            "Player 1",
-            p1
-        );
-
-
-        updateLobbyPlayer(
-            "hostPlayer2",
-            "Player 2",
-            p2
-        );
-
-
-        updateLobbyPlayer(
-            "participantPlayer1",
-            "Player 1",
-            p1
-        );
-
-
-        updateLobbyPlayer(
-            "participantPlayer2",
-            "Player 2",
-            p2
-        );
-
-
-        const ready =
-            Boolean(
-                p1 &&
-                p2
-            );
-
-
-        const startButton =
-            document.getElementById(
-                "startGameButton"
-            );
-
-
-        if (startButton) {
-
-            startButton.disabled =
-                !ready;
-        }
+    if (!state) {
+        return;
     }
 
+    const playersList =
+        Object.entries(state.players || {})
+            .filter(([slot, player]) => player);
 
-    function updateLobbyPlayer(
-        elementId,
-        fallback,
-        player
-    ) {
+    const hostList =
+        document.getElementById(
+            "hostPlayerList"
+        );
 
-        const element =
-            document.getElementById(
-                elementId
-            );
+    const participantList =
+        document.getElementById(
+            "participantPlayerList"
+        );
 
+    if (hostList) {
 
-        if (!element) {
-            return;
-        }
+        hostList.innerHTML = "";
 
+        playersList.forEach(
+            ([slot, player], index) => {
 
-        if (player) {
+                const item =
+                    document.createElement("div");
 
-            element.innerHTML = `
+                item.className =
+                    "player-item";
 
-                <span>
-                    ${escapeHtml(player.name)}
-                </span>
+                item.innerHTML = `
 
-                <span class="connected">
-                    ✓ Connected
-                </span>
+                    <span>
+                        #${index + 1}
+                        ${escapeHtml(player.name)}
+                    </span>
 
-            `;
+                    <span class="connected">
+                        ✓ Connected
+                    </span>
 
-        } else {
+                `;
 
-            element.innerHTML = `
-
-                <span>
-                    ${fallback}
-                </span>
-
-                <span class="waiting">
-                    Waiting...
-                </span>
-
-            `;
-        }
+                hostList.appendChild(item);
+            }
+        );
     }
 
+    if (participantList) {
+
+        participantList.innerHTML = "";
+
+        playersList.forEach(
+            ([slot, player], index) => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className =
+                    "player-item";
+
+                item.innerHTML = `
+
+                    <span>
+                        #${index + 1}
+                        ${escapeHtml(player.name)}
+                    </span>
+
+                    <span class="connected">
+                        ✓ Connected
+                    </span>
+
+                `;
+
+                participantList.appendChild(item);
+            }
+        );
+    }
+
+    const startButton =
+        document.getElementById(
+            "startGameButton"
+        );
+
+    const playerCount =
+        playersList.length;
+
+    if (startButton) {
+
+        startButton.disabled =
+            playerCount < 2;
+    }
+}
 
     /* =========================================================
     START GAME
@@ -2795,21 +2503,21 @@
 
     function startGame() {
 
-        if (
-            !players.player1.id ||
-            !players.player2.id
-        ) {
+        const activePlayers =
+            Object.values(players)
+                .filter(
+                    player =>
+                        player &&
+                        player.id
+                );
 
+        if (activePlayers.length < 2) {
             return;
         }
 
-
         socket.send(
             JSON.stringify({
-
-                type:
-                    "START_GAME"
-
+                type: "START_GAME"
             })
         );
     }
@@ -4111,21 +3819,17 @@
 
     function resetLocalRound() {
 
-        players.player1.score =
-            0;
+        Object.values(players).forEach(
+            player => {
 
+                if (player) {
 
-        players.player1.submitted =
-            false;
+                    player.score = 0;
+                    player.submitted = false;
 
-
-        players.player2.score =
-            0;
-
-
-        players.player2.submitted =
-            false;
-
+                }
+            }
+        );
 
         finalTranscript =
             "";
@@ -4250,173 +3954,133 @@
 
     function updateHostGame() {
 
-        if (
-            role !==
-            "host"
-        ) {
-
+        if (role !== "host") {
             return;
         }
 
-
-        const p1 =
-            players.player1;
-
-
-        const p2 =
-            players.player2;
-
-
-        const name1 =
+        const scoreboard =
             document.getElementById(
-                "hostScoreName1"
+                "hostScoreboard"
             );
 
-
-        const name2 =
-            document.getElementById(
-                "hostScoreName2"
-            );
-
-
-        if (name1) {
-
-            name1.textContent =
-                p1.name ||
-                "Player 1";
+        if (!scoreboard) {
+            return;
         }
 
+        const activePlayers =
+            Object.entries(players)
+                .filter(
+                    ([slot, player]) =>
+                        player &&
+                        player.id
+                );
 
-        if (name2) {
+        activePlayers.sort(
+            ([slotA, playerA],
+            [slotB, playerB]) => {
 
-            name2.textContent =
-                p2.name ||
-                "Player 2";
-        }
+                if (
+                    playerB.total !==
+                    playerA.total
+                ) {
 
+                    return (
+                        playerB.total -
+                        playerA.total
+                    );
+                }
 
-        const roundScore1 =
-            document.getElementById(
-                "hostRoundScore1"
-            );
-
-
-        const roundScore2 =
-            document.getElementById(
-                "hostRoundScore2"
-            );
-
-
-        if (roundScore1) {
-
-            roundScore1.textContent =
-                p1.submitted
-                    ? `${p1.score} / 100`
-                    : "— / 100";
-        }
-
-
-        if (roundScore2) {
-
-            roundScore2.textContent =
-                p2.submitted
-                    ? `${p2.score} / 100`
-                    : "— / 100";
-        }
-
-
-        const total1 =
-            document.getElementById(
-                "hostTotalScore1"
-            );
-
-
-        const total2 =
-            document.getElementById(
-                "hostTotalScore2"
-            );
-
-
-        if (total1) {
-
-            total1.textContent =
-                p1.total;
-        }
-
-
-        if (total2) {
-
-            total2.textContent =
-                p2.total;
-        }
-
-
-        const status1 =
-            document.getElementById(
-                "hostStatus1"
-            );
-
-
-        const status2 =
-            document.getElementById(
-                "hostStatus2"
-            );
-
-
-        if (status1) {
-
-            status1.textContent =
-                p1.submitted
-                    ? "✓ Submitted"
-                    : "🎤 Waiting for answer";
-        }
-
-
-        if (status2) {
-
-            status2.textContent =
-                p2.submitted
-                    ? "✓ Submitted"
-                    : "🎤 Waiting for answer";
-        }
-
-
-        moveCar(
-            "car1",
-            p1.position
+                return (
+                    playerB.position -
+                    playerA.position
+                );
+            }
         );
 
+        scoreboard.innerHTML = "";
 
-        moveCar(
-            "car2",
-            p2.position
+        activePlayers.forEach(
+            ([slot, player], index) => {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+                card.className =
+                    "score-card";
+
+                const roundScore =
+                    player.submitted
+                        ? `${player.score} / 100`
+                        : "— / 100";
+
+                const status =
+                    player.submitted
+                        ? "✓ Submitted"
+                        : "🎤 Waiting for answer";
+
+                card.innerHTML = `
+
+                    <div class="score-name">
+                        #${index + 1}
+                        ${escapeHtml(player.name)}
+                    </div>
+
+                    <div class="score-value">
+                        ${roundScore}
+                    </div>
+
+                    <div class="total-value">
+                        Total: ${player.total} pts
+                    </div>
+
+                    <div class="status">
+                        ${status}
+                    </div>
+
+                    <div class="track">
+
+                        <div
+                            class="car"
+                            id="car-${slot}"
+                        >
+                            🏎️
+                        </div>
+
+                    </div>
+
+                `;
+
+                scoreboard.appendChild(card);
+
+                moveCar(
+                    `car-${slot}`,
+                    player.position
+                );
+            }
         );
-
 
         const nextButton =
             document.getElementById(
                 "nextRoundButton"
             );
 
-
         if (!nextButton) {
             return;
         }
 
-
-        const bothSubmitted =
-            p1.submitted &&
-            p2.submitted;
-
+        const everyoneSubmitted =
+            activePlayers.length > 0 &&
+            activePlayers.every(
+                ([slot, player]) =>
+                    player.submitted
+            );
 
         nextButton.disabled =
-            !bothSubmitted;
+            !everyoneSubmitted;
 
-
-        if (
-            currentRound >=
-            20
-        ) {
+        if (currentRound >= 20) {
 
             nextButton.textContent =
                 "SHOW RESULTS";
@@ -4497,16 +4161,13 @@
         }
 
 
-        const activePlayers = [
-
-            players.player1,
-            players.player2
-
-        ].filter(
-            player =>
-                player &&
-                player.id
-        );
+        const activePlayers =
+            Object.values(players)
+                .filter(
+                    player =>
+                        player &&
+                        player.id
+                );
 
 
         activePlayers.sort(
@@ -4636,15 +4297,17 @@
         }
 
 
-        const you =
-            activePlayers.find(
+        const yourRank =
+            activePlayers.findIndex(
                 player =>
                     player.id ===
                     playerId
-            );
+            ) + 1;
 
 
-        if (!you) {
+        if (
+            yourRank <= 0
+        ) {
 
             standing.textContent =
                 "Waiting for scores...";
@@ -4654,32 +4317,30 @@
         }
 
 
-        const highest =
-            Math.max(
-                ...activePlayers.map(
-                    player =>
-                        player.total
-                )
-            );
+        const you =
+            activePlayers[
+                yourRank - 1
+            ];
 
 
-        const tied =
+        const sameScorePlayers =
             activePlayers.filter(
                 player =>
                     player.total ===
                     you.total
-            ).length >
-            1;
+            );
 
 
-        if (tied) {
+        if (
+            sameScorePlayers.length > 1
+        ) {
 
             standing.textContent =
-                "🤝 YOU ARE TIED!";
+                `🤝 YOU ARE TIED — RANK #${yourRank}`;
 
         } else if (
-            you.total ===
-            highest
+            yourRank ===
+            1
         ) {
 
             standing.textContent =
@@ -4688,10 +4349,48 @@
         } else {
 
             standing.textContent =
-                "🥈 YOU ARE IN 2ND PLACE";
+                `🏁 YOU ARE IN ${getOrdinal(yourRank)} PLACE`;
         }
+
     }
 
+
+    /* =========================================================
+    ORDINAL RANK
+    ========================================================= */
+
+    function getOrdinal(number) {
+
+        const n =
+            Number(number);
+
+
+        if (
+            n % 100 >= 11 &&
+            n % 100 <= 13
+        ) {
+
+            return `${n}TH`;
+        }
+
+
+        switch (
+            n % 10
+        ) {
+
+            case 1:
+                return `${n}ST`;
+
+            case 2:
+                return `${n}ND`;
+
+            case 3:
+                return `${n}RD`;
+
+            default:
+                return `${n}TH`;
+        }
+    }
 
     /* =========================================================
     NEXT ROUND
@@ -4699,59 +4398,67 @@
 
     function nextRound() {
 
-        const p1 =
-            players.player1;
-
-
-        const p2 =
-            players.player2;
-
-
-        if (
-            !p1.submitted ||
-            !p2.submitted
-        ) {
-
-            return;
-        }
-
-
-        if (
-            currentRound >=
-            20
-        ) {
-
-            socket.send(
-                JSON.stringify({
-
-                    type:
-                        "GAME_FINISHED"
-
-                })
+    const activePlayers =
+        Object.values(players)
+            .filter(
+                player =>
+                    player &&
+                    player.id
             );
 
 
-            return;
-        }
+    if (activePlayers.length < 2) {
+        return;
+    }
 
 
-        const nextRoundNumber =
-            currentRound +
-            1;
+    const everyoneSubmitted =
+        activePlayers.every(
+            player =>
+                player.submitted
+        );
 
+
+    if (!everyoneSubmitted) {
+        return;
+    }
+
+
+    if (
+        currentRound >=
+        20
+    ) {
 
         socket.send(
             JSON.stringify({
 
                 type:
-                    "NEXT_ROUND",
-
-                round:
-                    nextRoundNumber
+                    "GAME_FINISHED"
 
             })
         );
+
+        return;
     }
+
+
+    const nextRoundNumber =
+        currentRound +
+        1;
+
+
+    socket.send(
+        JSON.stringify({
+
+            type:
+                "NEXT_ROUND",
+
+            round:
+                nextRoundNumber
+
+        })
+    );
+}
 
 
     /* =========================================================
@@ -4760,149 +4467,211 @@
 
     function showFinal() {
 
-        const p1 =
-            players.player1;
-
-
-        const p2 =
-            players.player2;
-
-
-        let winner =
-            null;
-
-
-        if (
-            p1.total >
-            p2.total
-        ) {
-
-            winner =
-                p1;
-
-        } else if (
-            p2.total >
-            p1.total
-        ) {
-
-            winner =
-                p2;
-        }
-
-
-        const winnerName =
-            document.getElementById(
-                "winnerName"
+    const activePlayers =
+        Object.values(players)
+            .filter(
+                player =>
+                    player &&
+                    player.id
             );
 
 
-        const finalScore =
-            document.getElementById(
-                "finalScore"
-            );
+    activePlayers.sort(
+        (a, b) => {
 
-
-        const leaderboard =
-            document.getElementById(
-                "finalLeaderboard"
-            );
-
-
-        if (
-            p1.total ===
-            p2.total
-        ) {
-
-            winnerName.textContent =
-                "IT'S A TIE! 🤝";
-
-
-            finalScore.textContent =
-                `${p1.total} points each`;
-
-        } else {
-
-            winnerName.textContent =
-                winner.name;
-
-
-            finalScore.textContent =
-                `${winner.total} points`;
-        }
-
-
-        const finalPlayers = [
-
-            p1,
-            p2
-
-        ].sort(
-            (a, b) =>
-                b.total -
+            if (
+                b.total !==
                 a.total
+            ) {
+
+                return (
+                    b.total -
+                    a.total
+                );
+            }
+
+
+            return (
+                b.position -
+                a.position
+            );
+        }
+    );
+
+
+    const winner =
+        activePlayers[0];
+
+
+    const winnerName =
+        document.getElementById(
+            "winnerName"
         );
+
+
+    const finalScore =
+        document.getElementById(
+            "finalScore"
+        );
+
+
+    const leaderboard =
+        document.getElementById(
+            "finalLeaderboard"
+        );
+
+
+    if (!winner) {
+
+        winnerName.textContent =
+            "NO WINNER";
+
+
+        finalScore.textContent =
+            "";
 
 
         leaderboard.innerHTML =
             "";
 
 
-        finalPlayers.forEach(
-            (
-                player,
-                index
-            ) => {
-
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                row.className =
-                    "leaderboard-player";
-
-
-                row.innerHTML = `
-
-                    <div class="leaderboard-left">
-
-                        <div class="leaderboard-rank">
-                            ${
-                                index === 0
-                                    ? "🥇"
-                                    : "🥈"
-                            }
-                        </div>
-
-                        <div class="leaderboard-name">
-                            ${escapeHtml(player.name)}
-                        </div>
-
-                    </div>
-
-                    <div class="leaderboard-score">
-
-                        <div class="leaderboard-total">
-                            ${player.total} pts
-                        </div>
-
-                    </div>
-
-                `;
-
-
-                leaderboard.appendChild(
-                    row
-                );
-            }
-        );
-
-
         showScreen(
             "finalScreen"
         );
+
+
+        return;
     }
+
+
+    const topScore =
+        winner.total;
+
+
+    const winners =
+        activePlayers.filter(
+            player =>
+                player.total ===
+                topScore
+        );
+
+
+    if (
+        winners.length > 1
+    ) {
+
+        winnerName.textContent =
+            "IT'S A TIE! 🤝";
+
+
+        finalScore.textContent =
+            `${topScore} points`;
+
+    } else {
+
+        winnerName.textContent =
+            winner.name;
+
+
+        finalScore.textContent =
+            `${winner.total} points`;
+    }
+
+
+    /*
+        ONLY SHOW TOP 3
+    */
+
+    const topThree =
+        activePlayers.slice(
+            0,
+            3
+        );
+
+
+    leaderboard.innerHTML =
+        "";
+
+
+    topThree.forEach(
+        (
+            player,
+            index
+        ) => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "leaderboard-player";
+
+
+            let rank;
+
+
+            if (
+                index ===
+                0
+            ) {
+
+                rank =
+                    "🥇";
+
+            } else if (
+                index ===
+                1
+            ) {
+
+                rank =
+                    "🥈";
+
+            } else {
+
+                rank =
+                    "🥉";
+            }
+
+
+            row.innerHTML = `
+
+                <div class="leaderboard-left">
+
+                    <div class="leaderboard-rank">
+                        ${rank}
+                    </div>
+
+                    <div class="leaderboard-name">
+                        ${escapeHtml(player.name)}
+                    </div>
+
+                </div>
+
+
+                <div class="leaderboard-score">
+
+                    <div class="leaderboard-total">
+                        ${player.total} pts
+                    </div>
+
+                </div>
+
+            `;
+
+
+            leaderboard.appendChild(
+                row
+            );
+        }
+    );
+
+
+    showScreen(
+        "finalScreen"
+    );
+}
 
 
     /* =========================================================
