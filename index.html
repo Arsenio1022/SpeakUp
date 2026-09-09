@@ -2971,65 +2971,38 @@
         ===================================================== */
 
         recognition.onresult = event => {
-            let finalText = "";
-            let interimText = "";
 
-            for (
-                let i = 0;
-                i < event.results.length;
-                i++
+            const result =
+                event.results[event.results.length - 1];
+
+            if (
+                !result ||
+                !result[0]
             ) {
-
-                const result =
-                    event.results[i];
-
-                if (
-                    !result ||
-                    !result[0]
-                ) {
-                    continue;
-                }
-
-                const text =
-                    result[0].transcript.trim();
-
-                if (!text) {
-                    continue;
-                }
-
-                if (result.isFinal) {
-
-                    finalText +=
-                        text + " ";
-
-                } else {
-
-                    interimText +=
-                        text + " ";
-                }
+                return;
             }
 
+            const text =
+                result[0].transcript.trim();
+
+            if (!text) {
+                return;
+            }
+
+            /*
+                ONLY SHOW THE NEWEST
+                SPEECH RECOGNITION RESULT.
+            */
 
             finalTranscript =
-                finalText
-                    .replace(/\s+/g, " ")
-                    .trim();
-
+                result.isFinal
+                    ? text
+                    : "";
 
             interimTranscript =
-                interimText
-                    .replace(/\s+/g, " ")
-                    .trim();
-
-
-            const displayText =
-                (
-                    finalTranscript +
-                    " " +
-                    interimTranscript
-                )
-                .replace(/\s+/g, " ")
-                .trim();
+                result.isFinal
+                    ? ""
+                    : text;
 
 
             const transcript =
@@ -3041,11 +3014,10 @@
             if (transcript) {
 
                 transcript.textContent =
-                    displayText ||
+                    text ||
                     "Listening...";
             }
-        }
-};
+        };
 
 
         /* =====================================================
@@ -3185,6 +3157,7 @@
                         false;
                 }
         };
+    }
 
 
     /* =========================================================
