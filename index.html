@@ -976,7 +976,7 @@
         </h2>
 
         <p class="subtitle">
-            Create a game room for two participants.
+            Create a game room for up to 50 participants.
         </p>
 
 
@@ -1093,7 +1093,7 @@
         </h2>
 
         <p class="subtitle">
-            Share this code with the two participants.
+            Share this code with up to 50 participants.
         </p>
 
 
@@ -1186,7 +1186,7 @@
 
             <br><br>
 
-            Once both participants join,
+            Once at least two participants join,
             the host will start the race.
 
         </div>
@@ -1489,6 +1489,7 @@
     let playerSlot = null;
     let playerName = null;
     let currentRound = 1;
+    let challengeOrder = [];
 
 
     /* =========================================================
@@ -2366,6 +2367,9 @@
         currentRound = state.currentRound;
     }
 
+    if (Array.isArray(state.challengeOrder)) {
+        challengeOrder = state.challengeOrder;
+    }
     if (state.players) {
 
         players = {};
@@ -2541,13 +2545,32 @@
     /* =========================================================
     CHALLENGE DISPLAY
     ========================================================= */
+    function getCurrentChallenge() {
+
+        if (
+            !Array.isArray(challengeOrder) ||
+            challengeOrder.length !== 20
+        ) {
+            return null;
+        }
+
+        const challengeIndex =
+            challengeOrder[currentRound - 1];
+
+        if (
+            !Number.isInteger(challengeIndex) ||
+            !challenges[challengeIndex]
+        ) {
+            return null;
+        }
+
+        return challenges[challengeIndex];
+    }
 
     function updateChallenge() {
 
         const challenge =
-            challenges[
-                currentRound - 1
-            ];
+            getCurrentChallenge();
 
 
         if (!challenge) {
@@ -3181,9 +3204,16 @@
 
 
         const challenge =
-            challenges[
-                currentRound - 1
-            ];
+            getCurrentChallenge();
+
+        if (!challenge) {
+
+            alert(
+                "The current challenge could not be loaded."
+            );
+
+            return;
+        }
 
 
         const confidence =

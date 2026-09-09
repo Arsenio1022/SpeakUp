@@ -323,6 +323,9 @@ function getPublicRoomState(room) {
         gameStarted:
             room.gameStarted,
 
+        challengeOrder:
+            room.challengeOrder,
+
         players:
             publicPlayers
     };
@@ -353,6 +356,34 @@ function calculateMovement(score) {
 
     return 5;
 }
+
+    function generateChallengeOrder() {
+
+        const order = [];
+
+        for (let i = 0; i < 20; i++) {
+            order.push(i);
+        }
+
+        for (let i = order.length - 1; i > 0; i--) {
+
+            const j =
+                Math.floor(
+                    Math.random() * (i + 1)
+                );
+
+            [
+                order[i],
+                order[j]
+            ] =
+            [
+                order[j],
+                order[i]
+            ];
+        }
+
+        return order;
+    }
 
 
 /* =========================================================
@@ -486,6 +517,9 @@ wss.on(
 
                         gameStarted:
                             false,
+
+                        challengeOrder:
+                            [],
 
                         players: {}
                     };
@@ -842,6 +876,9 @@ wss.on(
 
                     room.currentRound =
                         1;
+
+                    room.challengeOrder =
+                        generateChallengeOrder();
 
                     room.gameStarted =
                         true;
