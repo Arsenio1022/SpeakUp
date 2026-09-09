@@ -1658,6 +1658,7 @@
 
     let finalTranscript = "";
     let interimTranscript = "";
+    let recognitionResults = [];
 
     let recognitionConfidenceTotal = 0;
     let recognitionConfidenceCount = 0;
@@ -2971,138 +2972,147 @@
         ===================================================== */
 
         recognition.onresult =
-            event => {
+    event => {
 
-                let finalParts =
-                    [];
+        for (
+            let i = event.resultIndex;
+            i < event.results.length;
+            i++
+        ) {
 
-                let interimParts =
-                    [];
+            const result =
+                event.results[i];
 
+            if (
+                !result ||
+                !result[0]
+            ) {
+                continue;
+            }
 
-                for (
-                    let i =
-                        event.resultIndex;
-
-                    i <
-                    event.results.length;
-
-                    i++
-                ) {
-
-                    const result =
-                        event.results[i];
-
-
-                    if (
-                        !result ||
-                        !result[0]
-                    ) {
-
-                        continue;
-                    }
-
-
-                    const text =
-                        result[0]
-                            .transcript
-                            .trim();
-
-
-                    if (!text) {
-                        continue;
-                    }
-
-
-                    if (
-                        result.isFinal
-                    ) {
-
-                        finalParts.push(
-                            text
-                        );
-
-
-                        if (
-                            typeof
-                            result[0].confidence ===
-                            "number" &&
-
-                            result[0].confidence >
-                            0
-                        ) {
-
-                            recognitionConfidenceTotal +=
-                                result[0].confidence;
-
-
-                            recognitionConfidenceCount++;
-                        }
-
-                    } else {
-
-                        interimParts.push(
-                            text
-                        );
-                    }
-                }
-
-
-                if (
-                    finalParts.length >
-                    0
-                ) {
-
-                    finalTranscript =
-                        (
-                            finalTranscript +
-                            " " +
-                            finalParts.join(" ")
-                        )
-                        .replace(
-                            /\s+/g,
-                            " "
-                        )
-                        .trim();
-                }
-
-
-                interimTranscript =
-                    interimParts
-                        .join(" ")
-                        .replace(
-                            /\s+/g,
-                            " "
-                        )
-                        .trim();
-
-
-                const displayText =
-                    (
-                        finalTranscript +
-                        " " +
-                        interimTranscript
-                    )
-                    .replace(
-                        /\s+/g,
-                        " "
-                    )
+            const text =
+                result[0]
+                    .transcript
                     .trim();
 
+            if (!text) {
+                continue;
+            }
 
-                const transcript =
-                    document.getElementById(
-                        "transcript"
+
+            /*
+                STORE THE RESULT AT ITS ORIGINAL
+                RECOGNITION POSITION.
+
+                If the browser updates an earlier
+                result, we replace it instead of
+                adding it again.
+            */
+
+            recognitionResults[i] = {
+
+                text: text,
+
+                isFinal:
+                    result.isFinal,
+
+                confidence:
+                    typeof result[0].confidence === "number"
+                        ? result[0].confidence
+                        : 0
+
+            };
+        }
+
+
+        /*
+            REBUILD THE ENTIRE TRANSCRIPT
+            FROM THE LATEST RESULTS.
+        */
+
+        const finalParts = [];
+        const interimParts = [];
+
+
+        recognitionResults.forEach(
+            result => {
+
+                if (!result) {
+                    return;
+                }
+
+
+                if (result.isFinal) {
+
+                    finalParts.push(
+                        result.text
                     );
 
 
-                if (transcript) {
+                } else {
 
-                    transcript.textContent =
-                        displayText ||
-                        "Listening...";
+                    interimParts.push(
+                        result.text
+                    );
                 }
-            };
+            }
+        );
+
+
+        /*
+            ONE CLEAN FINAL TRANSCRIPT
+        */
+
+        finalTranscript =
+            finalParts
+                .join(" ")
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim();
+
+
+        interimTranscript =
+            interimParts
+                .join(" ")
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim();
+
+
+        /*
+            DISPLAY ONE CONTINUOUS SENTENCE
+        */
+
+        const displayText =
+            (
+                finalTranscript +
+                " " +
+                interimTranscript
+            )
+            .replace(
+                /\s+/g,
+                " "
+            )
+            .trim();
+
+
+        const transcript =
+            document.getElementById(
+                "transcript"
+            );
+
+
+        if (transcript) {
+
+            transcript.textContent =
+                displayText ||
+                "Listening...";
+        }
+    };
 
 
         /* =====================================================
@@ -3408,7 +3418,6 @@
             return;
         }
 
-
         await startListening();
     }
 
@@ -3424,6 +3433,9 @@
 
         interimTranscript =
             "";
+
+        recognitionResults = 
+            [];
 
         recognitionConfidenceTotal =
             0;
