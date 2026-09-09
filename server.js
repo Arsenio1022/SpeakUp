@@ -361,7 +361,7 @@ function calculateMovement(score) {
 
         const order = [];
 
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 20; i++) {
             order.push(i);
         }
 
