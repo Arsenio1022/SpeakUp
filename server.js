@@ -6,41 +6,7 @@ const WebSocket = require("ws");
 const PORT = process.env.PORT || 3000;
 
 const rooms = new Map();
-
-
-/* =========================================================
-   ROOM STRUCTURE
-   =========================================================
-
-   room = {
-       code,
-       host,
-       currentRound,
-       gameStarted,
-
-       players: {
-           player1: {
-               id,
-               name,
-               socket,
-               score,
-               total,
-               position,
-               submitted
-           },
-
-           player2: {
-               id,
-               name,
-               socket,
-               score,
-               total,
-               position,
-               submitted
-           }
-       }
-   }
-*/
+const MAX_PLAYERS = 50;
 
 
 /* =========================================================
@@ -232,22 +198,22 @@ function broadcastRoom(room, data) {
         return;
     }
 
-
     send(
         room.host,
         data
     );
 
+    Object.values(room.players).forEach(
+        player => {
 
-    send(
-        room.players.player1?.socket,
-        data
-    );
+            if (player) {
+                send(
+                    player.socket,
+                    data
+                );
+            }
 
-
-    send(
-        room.players.player2?.socket,
-        data
+        }
     );
 }
 
@@ -335,6 +301,17 @@ function getPublicPlayer(player) {
 
 function getPublicRoomState(room) {
 
+    const publicPlayers = {};
+
+    Object.entries(room.players).forEach(
+        ([slot, player]) => {
+
+            publicPlayers[slot] =
+                getPublicPlayer(player);
+
+        }
+    );
+
     return {
 
         roomCode:
@@ -346,18 +323,8 @@ function getPublicRoomState(room) {
         gameStarted:
             room.gameStarted,
 
-        players: {
-
-            player1:
-                getPublicPlayer(
-                    room.players.player1
-                ),
-
-            player2:
-                getPublicPlayer(
-                    room.players.player2
-                )
-        }
+        players:
+            publicPlayers
     };
 }
 
@@ -520,14 +487,7 @@ wss.on(
                         gameStarted:
                             false,
 
-                        players: {
-
-                            player1:
-                                null,
-
-                            player2:
-                                null
-                        }
+                        players: {}
                     };
 
 
@@ -677,21 +637,23 @@ wss.on(
                     }
 
 
-                    if (
-                        room.players.player1 &&
-                        room.players.player2
-                    ) {
+                    const playerCount =
+                    Object.values(room.players)
+                        .filter(Boolean)
+                        .length;
+
+                    if (playerCount >= MAX_PLAYERS) {
 
                         send(
                             socket,
                             {
-                                type:
-                                    "ERROR",
+                            type:
+                            "ERROR",
 
-                                message:
-                                    "This game already has two participants."
-                            }
-                        );
+                            message:
+                            "This game is full. Maximum 50 participants allowed."
+                            }   
+                        )  ;
 
                         return;
                     }
@@ -701,22 +663,42 @@ wss.on(
                         generatePlayerId();
 
 
-                    let slot;
+                    let slot = null;
 
-
-                    if (
-                        !room.players.player1
+                    for (
+                        let i = 1;
+                        i <= MAX_PLAYERS;
+                        i++
                     ) {
 
-                        slot =
-                            "player1";
+                        const candidate =
+                            `player${i}`;
 
+                        if (
+                            !room.players[candidate]
+                        ) {
+
+                            slot =
+                                candidate;
+
+                            break;
+                        }
                     }
 
-                    else {
+                    if (!slot) {
 
-                        slot =
-                            "player2";
+                        send(
+                            socket,
+                            {
+                                type:
+                                    "ERROR",
+
+                                message:
+                                    "This game is full. Maximum 50 participants allowed."
+                            }
+                        );
+
+                        return;
                     }
 
 
@@ -835,9 +817,12 @@ wss.on(
                     }
 
 
+                    const playerList =
+                        Object.values(room.players)
+                            .filter(Boolean);
+
                     if (
-                        !room.players.player1 ||
-                        !room.players.player2
+                        playerList.length < 2
                     ) {
 
                         send(
@@ -847,7 +832,7 @@ wss.on(
                                     "ERROR",
 
                                 message:
-                                    "Two participants are required."
+                                    "At least two participants are required to start the game."
                             }
                         );
 
@@ -862,30 +847,16 @@ wss.on(
                         true;
 
 
-                    room.players.player1.score =
-                        0;
+                    playerList.forEach(
+                        player => {
 
-                    room.players.player1.total =
-                        0;
+                            player.score = 0;
+                            player.total = 0;
+                            player.position = 0;
+                            player.submitted = false;
 
-                    room.players.player1.position =
-                        0;
-
-                    room.players.player1.submitted =
-                        false;
-
-
-                    room.players.player2.score =
-                        0;
-
-                    room.players.player2.total =
-                        0;
-
-                    room.players.player2.position =
-                        0;
-
-                    room.players.player2.submitted =
-                        false;
+                        }
+                    );
 
 
                     broadcastRoom(
@@ -1077,19 +1048,17 @@ wss.on(
                         return;
                     }
 
+                    const playerList =
+                        Object.values(room.players)
+                            .filter(Boolean);
 
-                    if (
-                        !room.players.player1 ||
-                        !room.players.player2
-                    ) {
-                        return;
-                    }
+                    const everyoneSubmitted =
+                        playerList.every(
+                            player =>
+                                player.submitted
+                        );
 
-
-                    if (
-                        !room.players.player1.submitted ||
-                        !room.players.player2.submitted
-                    ) {
+                    if (!everyoneSubmitted) {
 
                         send(
                             socket,
@@ -1098,7 +1067,7 @@ wss.on(
                                     "ERROR",
 
                                 message:
-                                    "Both participants must submit their answers first."
+                                    "All participants must submit their answers first."
                             }
                         );
 
@@ -1137,18 +1106,14 @@ wss.on(
                         requestedRound;
 
 
-                    room.players.player1.score =
-                        0;
+                    playerList.forEach(
+                        player => {
 
-                    room.players.player1.submitted =
-                        false;
+                            player.score = 0;
+                            player.submitted = false;
 
-
-                    room.players.player2.score =
-                        0;
-
-                    room.players.player2.submitted =
-                        false;
+                        }
+                    );
 
 
                     broadcastRoom(
