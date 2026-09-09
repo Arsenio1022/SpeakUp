@@ -1621,2376 +1621,2503 @@
 
 <script>
 
-/* =========================================================
-   WEBSOCKET CONNECTION
-   ========================================================= */
+    /* =========================================================
+    WEBSOCKET CONNECTION
+    ========================================================= */
 
-const protocol =
-    location.protocol === "https:"
-        ? "wss:"
-        : "ws:";
+    const protocol =
+        location.protocol === "https:"
+            ? "wss:"
+            : "ws:";
 
-const socket =
-    new WebSocket(
-        `${protocol}//${location.host}`
-    );
+    const socket =
+        new WebSocket(
+            `${protocol}//${location.host}`
+        );
 
 
-/* =========================================================
-   GAME DATA
-   ========================================================= */
+    /* =========================================================
+    GAME DATA
+    ========================================================= */
 
-let role = null;
-let roomCode = null;
-let playerId = null;
-let playerSlot = null;
-let playerName = null;
-let currentRound = 1;
+    let role = null;
+    let roomCode = null;
+    let playerId = null;
+    let playerSlot = null;
+    let playerName = null;
+    let currentRound = 1;
 
 
-/* =========================================================
-   SPEECH DATA
-   ========================================================= */
+    /* =========================================================
+    SPEECH DATA
+    ========================================================= */
 
-let isListening = false;
-let recognition = null;
-let pendingSubmit = false;
+    let isListening = false;
+    let recognition = null;
+    let pendingSubmit = false;
 
-let finalTranscript = "";
-let interimTranscript = "";
+    let finalTranscript = "";
+    let interimTranscript = "";
 
-let recognitionConfidenceTotal = 0;
-let recognitionConfidenceCount = 0;
-let microphonePermissionGranted = false;
-
-let speechStartTime = 0;
-let speechElapsedSeconds = 0;
+    let recognitionConfidenceTotal = 0;
+    let recognitionConfidenceCount = 0;
+    let microphonePermissionGranted = false;
+
+    let speechStartTime = 0;
+    let speechElapsedSeconds = 0;
 
-
-/* =========================================================
-   PLAYERS
-   ========================================================= */
-
-let players = {
-
-    player1: {
-
-        id: null,
-        name: "",
-        score: 0,
-        total: 0,
-        position: 0,
-        submitted: false
-
-    },
-
-    player2: {
-
-        id: null,
-        name: "",
-        score: 0,
-        total: 0,
-        position: 0,
-        submitted: false
-
-    }
-
-};
-
-
-/* =========================================================
-   CHALLENGES
-   ========================================================= */
-
-const challenges = [
-
-    // 🟢 LEVEL 1 — MANAGEABLE
-
-    {
-        text: "Podcasting allows students to practice speaking clearly and confidently for an audience.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 1
-    },
-
-    {
-        text: "Students can improve their pronunciation by listening to their recorded voices.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 1
-    },
-
-    {
-        text: "Speech recognition converts spoken words into written text for easier review.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 1
-    },
-
-    {
-        text: "Students can evaluate their communication skills by reviewing their recorded performances.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 1
-    },
-
-    {
-        text: "Speech recognition applications can process different patterns of human speech with increasing accuracy.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 1
-    },
-
-
-    // 🟡 LEVEL 2 — CHALLENGING
-
-    {
-        text: "Effective communication requires students to express their ideas clearly while adapting their language to different audiences.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 2
-    },
-
-    {
-        text: "Digital recording tools provide students with opportunities to identify weaknesses in their pronunciation and improve their speaking habits.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 2
-    },
-
-    {
-        text: "Artificial intelligence can assist students in developing communication skills by providing immediate feedback on their spoken responses.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 2
-    },
-
-    {
-        text: "The responsible utilization of artificial intelligence requires students to recognize its limitations in authentic human communication.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 2
-    },
-
-    {
-        text: "Transcription applications can transform extended conversations into written records for subsequent evaluation and analysis.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 2
-    },
-
-
-    // 🟠 LEVEL 3 — ADVANCED
-
-    {
-        text: "Students who consistently review their recorded performances can identify recurring pronunciation difficulties and develop strategies for improving their fluency.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 3
-    },
-
-    {
-        text: "Speech recognition technologies enable learners to examine their spoken language while identifying patterns that may interfere with effective communication.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 3
-    },
-
-    {
-        text: "Although automated feedback can support language development, students should remain aware that technological systems may misinterpret words because of accents, background noise, or unclear speech.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 3
-    },
-
-    {
-        text: "The increasing availability of artificial intelligence in educational environments provides students with convenient opportunities to practice communication skills independently.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 3
-    },
+
+    /* =========================================================
+    PLAYERS
+    ========================================================= */
+
+    let players = {
+
+        player1: {
+
+            id: null,
+            name: "",
+            score: 0,
+            total: 0,
+            position: 0,
+            submitted: false
+
+        },
+
+        player2: {
+
+            id: null,
+            name: "",
+            score: 0,
+            total: 0,
+            position: 0,
+            submitted: false
+
+        }
+
+    };
+
+
+    /* =========================================================
+    CHALLENGES
+    ========================================================= */
+
+    const challenges = [
+
+        // 🟢 LEVEL 1 — MANAGEABLE
+
+        {
+            text: "Podcasting allows students to practice speaking clearly and confidently for an audience.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 1
+        },
+
+        {
+            text: "Students can improve their pronunciation by listening to their recorded voices.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 1
+        },
+
+        {
+            text: "Speech recognition converts spoken words into written text for easier review.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 1
+        },
+
+        {
+            text: "Students can evaluate their communication skills by reviewing their recorded performances.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 1
+        },
+
+        {
+            text: "Speech recognition applications can process different patterns of human speech with increasing accuracy.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 1
+        },
+
+
+        // 🟡 LEVEL 2 — CHALLENGING
+
+        {
+            text: "Effective communication requires students to express their ideas clearly while adapting their language to different audiences.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 2
+        },
+
+        {
+            text: "Digital recording tools provide students with opportunities to identify weaknesses in their pronunciation and improve their speaking habits.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 2
+        },
+
+        {
+            text: "Artificial intelligence can assist students in developing communication skills by providing immediate feedback on their spoken responses.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 2
+        },
+
+        {
+            text: "The responsible utilization of artificial intelligence requires students to recognize its limitations in authentic human communication.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 2
+        },
+
+        {
+            text: "Transcription applications can transform extended conversations into written records for subsequent evaluation and analysis.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 2
+        },
+
+
+        // 🟠 LEVEL 3 — ADVANCED
+
+        {
+            text: "Students who consistently review their recorded performances can identify recurring pronunciation difficulties and develop strategies for improving their fluency.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 3
+        },
+
+        {
+            text: "Speech recognition technologies enable learners to examine their spoken language while identifying patterns that may interfere with effective communication.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 3
+        },
+
+        {
+            text: "Although automated feedback can support language development, students should remain aware that technological systems may misinterpret words because of accents, background noise, or unclear speech.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 3
+        },
+
+        {
+            text: "The increasing availability of artificial intelligence in educational environments provides students with convenient opportunities to practice communication skills independently.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 3
+        },
+
+        {
+            text: "Students must critically evaluate automated speech assessments because accurate transcription does not necessarily indicate precise pronunciation or effective communication.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 3
+        },
+
+
+        // 🔴 LEVEL 4 — VERY ADVANCED
+
+        {
+            text: "The integration of speech recognition into educational platforms enables learners to receive immediate transcription-based feedback while practicing increasingly sophisticated forms of verbal communication.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 4
+        },
+
+        {
+            text: "Artificial intelligence allows speech-recognition applications to improve through continuous interaction, although their effectiveness remains dependent on the quality and diversity of the language data they process.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 4
+        },
+
+        {
+            text: "The increasingly sophisticated integration of artificial intelligence into communication technologies necessitates heightened awareness of privacy, security, and responsible utilization.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 4
+        },
+
+        {
+            text: "As speech-recognition technologies become increasingly capable of interpreting complex linguistic patterns, students must understand that technological convenience should not replace critical evaluation of authentic human communication.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 4
+        },
+
+
+        // 💀 LEVEL 5 — FINAL CHALLENGE
+
+        {
+            text: "Although technologically sophisticated speech-recognition applications can facilitate remarkably accurate transcription, their responsible implementation necessitates careful consideration of linguistic nuances, contextual interpretation, privacy vulnerabilities, and the irreplaceable significance of authentic human communication.",
+            type: "pronunciation",
+            level: "C1",
+            difficulty: 5
+        }
+
+    ];
+
+
+    /* =========================================================
+    SCREEN MANAGEMENT
+    ========================================================= */
+
+    function showScreen(id) {
 
-    {
-        text: "Students must critically evaluate automated speech assessments because accurate transcription does not necessarily indicate precise pronunciation or effective communication.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 3
-    },
-
-
-    // 🔴 LEVEL 4 — VERY ADVANCED
-
-    {
-        text: "The integration of speech recognition into educational platforms enables learners to receive immediate transcription-based feedback while practicing increasingly sophisticated forms of verbal communication.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 4
-    },
-
-    {
-        text: "Artificial intelligence allows speech-recognition applications to improve through continuous interaction, although their effectiveness remains dependent on the quality and diversity of the language data they process.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 4
-    },
-
-    {
-        text: "The increasingly sophisticated integration of artificial intelligence into communication technologies necessitates heightened awareness of privacy, security, and responsible utilization.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 4
-    },
-
-    {
-        text: "As speech-recognition technologies become increasingly capable of interpreting complex linguistic patterns, students must understand that technological convenience should not replace critical evaluation of authentic human communication.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 4
-    },
-
-
-    // 💀 LEVEL 5 — FINAL CHALLENGE
-
-    {
-        text: "Although technologically sophisticated speech-recognition applications can facilitate remarkably accurate transcription, their responsible implementation necessitates careful consideration of linguistic nuances, contextual interpretation, privacy vulnerabilities, and the irreplaceable significance of authentic human communication.",
-        type: "pronunciation",
-        level: "C1",
-        difficulty: 5
-    }
-
-];
-
-
-/* =========================================================
-   SCREEN MANAGEMENT
-   ========================================================= */
-
-function showScreen(id) {
-
-    document
-        .querySelectorAll(".screen")
-        .forEach(screen => {
-
-            screen.classList.remove("active");
-
-        });
-
-
-    const screen =
-        document.getElementById(id);
-
-
-    if (screen) {
-
-        screen.classList.add("active");
-
-    }
-}
-
-
-/* =========================================================
-   ERROR MESSAGE
-   ========================================================= */
-
-function showError(id, message) {
-
-    const element =
-        document.getElementById(id);
-
-
-    if (!element) {
-        return;
-    }
-
-
-    element.textContent =
-        message;
-
-    element.style.display =
-        "block";
-}
-
-
-function clearError(id) {
-
-    const element =
-        document.getElementById(id);
-
-
-    if (!element) {
-        return;
-    }
-
-
-    element.textContent =
-        "";
-
-    element.style.display =
-        "none";
-}
-
-
-/* =========================================================
-   HOME BUTTONS
-   ========================================================= */
-
-function showHostSetup() {
-
-    role =
-        "host";
-
-    showScreen(
-        "hostSetupScreen"
-    );
-}
-
-
-function showParticipantSetup() {
-
-    role =
-        "participant";
-
-    showScreen(
-        "participantSetupScreen"
-    );
-}
-
-
-/* =========================================================
-   CREATE ROOM
-   ========================================================= */
-
-function createRoom() {
-
-    clearError(
-        "hostSetupError"
-    );
-
-
-    const name =
         document
-            .getElementById(
-                "hostName"
-            )
-            .value
-            .trim();
+            .querySelectorAll(".screen")
+            .forEach(screen => {
+
+                screen.classList.remove("active");
+
+            });
 
 
-    if (!name) {
+        const screen =
+            document.getElementById(id);
 
-        showError(
-            "hostSetupError",
-            "Please enter your name."
-        );
 
-        return;
+        if (screen) {
+
+            screen.classList.add("active");
+
+        }
     }
 
 
-    if (
-        socket.readyState !==
-        WebSocket.OPEN
-    ) {
+    /* =========================================================
+    ERROR MESSAGE
+    ========================================================= */
 
-        showError(
-            "hostSetupError",
-            "Not connected to the server yet. Please wait a moment."
-        );
+    function showError(id, message) {
 
-        return;
-    }
+        const element =
+            document.getElementById(id);
 
 
-    socket.send(
-        JSON.stringify({
-
-            type:
-                "CREATE_ROOM",
-
-            name:
-                name
-
-        })
-    );
-}
-
-
-/* =========================================================
-   JOIN ROOM
-   ========================================================= */
-
-function joinRoom() {
-
-    clearError(
-        "participantSetupError"
-    );
-
-
-    const name =
-        document
-            .getElementById(
-                "participantName"
-            )
-            .value
-            .trim();
-
-
-    const code =
-        document
-            .getElementById(
-                "roomCodeInput"
-            )
-            .value
-            .trim()
-            .toUpperCase();
-
-
-    if (!name) {
-
-        showError(
-            "participantSetupError",
-            "Please enter your name."
-        );
-
-        return;
-    }
-
-
-    if (code.length !== 4) {
-
-        showError(
-            "participantSetupError",
-            "The game code must be 4 characters."
-        );
-
-        return;
-    }
-
-
-    if (
-        socket.readyState !==
-        WebSocket.OPEN
-    ) {
-
-        showError(
-            "participantSetupError",
-            "Not connected to the server yet. Please wait a moment."
-        );
-
-        return;
-    }
-
-
-    socket.send(
-        JSON.stringify({
-
-            type:
-                "JOIN_ROOM",
-
-            name:
-                name,
-
-            roomCode:
-                code
-
-        })
-    );
-}
-
-
-/* =========================================================
-   SERVER MESSAGE HANDLER
-   ========================================================= */
-
-socket.addEventListener(
-    "message",
-    event => {
-
-        let message;
-
-
-        try {
-
-            message =
-                JSON.parse(
-                    event.data
-                );
-
-        } catch (error) {
-
-            console.error(
-                "Invalid server message:",
-                error
-            );
-
+        if (!element) {
             return;
         }
 
 
-        console.log(
-            "SERVER:",
-            message
+        element.textContent =
+            message;
+
+        element.style.display =
+            "block";
+    }
+
+
+    function clearError(id) {
+
+        const element =
+            document.getElementById(id);
+
+
+        if (!element) {
+            return;
+        }
+
+
+        element.textContent =
+            "";
+
+        element.style.display =
+            "none";
+    }
+
+
+    /* =========================================================
+    HOME BUTTONS
+    ========================================================= */
+
+    function showHostSetup() {
+
+        role =
+            "host";
+
+        showScreen(
+            "hostSetupScreen"
+        );
+    }
+
+
+    function showParticipantSetup() {
+
+        role =
+            "participant";
+
+        showScreen(
+            "participantSetupScreen"
+        );
+    }
+
+
+    /* =========================================================
+    CREATE ROOM
+    ========================================================= */
+
+    function createRoom() {
+
+        clearError(
+            "hostSetupError"
         );
 
 
-        if (
-            message.type ===
-            "ROOM_CREATED"
-        ) {
-
-            roomCode =
-                message.roomCode;
-
-
-            applyScoreState(
-                message.state
-            );
-
-
+        const name =
             document
                 .getElementById(
-                    "hostRoomCode"
+                    "hostName"
                 )
-                .textContent =
-                roomCode;
+                .value
+                .trim();
 
 
-            showScreen(
-                "hostLobbyScreen"
+        if (!name) {
+
+            showError(
+                "hostSetupError",
+                "Please enter your name."
             );
-
-
-            updateLobby(
-                message.state
-            );
-
 
             return;
         }
 
 
         if (
-            message.type ===
-            "JOINED_ROOM"
+            socket.readyState !==
+            WebSocket.OPEN
         ) {
 
-            roomCode =
-                message.roomCode;
-
-
-            playerId =
-                message.playerId;
-
-
-            playerSlot =
-                message.playerSlot;
-
-
-            playerName =
-                message.state
-                    .players[
-                        playerSlot
-                    ]?.name || "";
-
-
-            applyScoreState(
-                message.state
+            showError(
+                "hostSetupError",
+                "Not connected to the server yet. Please wait a moment."
             );
 
+            return;
+        }
 
+
+        socket.send(
+            JSON.stringify({
+
+                type:
+                    "CREATE_ROOM",
+
+                name:
+                    name
+
+            })
+        );
+    }
+
+
+    /* =========================================================
+    JOIN ROOM
+    ========================================================= */
+
+    function joinRoom() {
+
+        clearError(
+            "participantSetupError"
+        );
+
+
+        const name =
             document
                 .getElementById(
-                    "participantRoomCode"
+                    "participantName"
                 )
-                .textContent =
-                roomCode;
+                .value
+                .trim();
 
 
-            showScreen(
-                "participantLobbyScreen"
+        const code =
+            document
+                .getElementById(
+                    "roomCodeInput"
+                )
+                .value
+                .trim()
+                .toUpperCase();
+
+
+        if (!name) {
+
+            showError(
+                "participantSetupError",
+                "Please enter your name."
             );
 
+            return;
+        }
 
-            updateLobby(
-                message.state
+
+        if (code.length !== 4) {
+
+            showError(
+                "participantSetupError",
+                "The game code must be 4 characters."
             );
-
 
             return;
         }
 
 
         if (
-            message.type ===
-            "ROOM_UPDATED"
+            socket.readyState !==
+            WebSocket.OPEN
         ) {
 
-            applyScoreState(
-                message.state
+            showError(
+                "participantSetupError",
+                "Not connected to the server yet. Please wait a moment."
             );
-
-
-            updateLobby(
-                message.state
-            );
-
 
             return;
         }
 
 
-        if (
-            message.type ===
-            "GAME_STARTED"
-        ) {
+        socket.send(
+            JSON.stringify({
 
-            currentRound =
-                message.round ||
-                1;
+                type:
+                    "JOIN_ROOM",
 
+                name:
+                    name,
 
-            applyScoreState(
-                message.state
-            );
+                roomCode:
+                    code
 
-
-            resetLocalRound();
-
-
-            updateChallenge();
+            })
+        );
+    }
 
 
-            if (
-                role ===
-                "host"
-            ) {
+    /* =========================================================
+    SERVER MESSAGE HANDLER
+    ========================================================= */
 
-                showScreen(
-                    "hostGameScreen"
+    socket.addEventListener(
+        "message",
+        event => {
+
+            let message;
+
+
+            try {
+
+                message =
+                    JSON.parse(
+                        event.data
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    "Invalid server message:",
+                    error
                 );
 
-
-                updateHostGame();
-
-            } else {
-
-                showScreen(
-                    "participantGameScreen"
-                );
-
-
-                updateParticipantLeaderboard();
+                return;
             }
 
 
-            return;
-        }
-
-
-        if (
-            message.type ===
-            "SCORE_UPDATE"
-        ) {
-
-            applyScoreState(
-                message.state
-            );
-
-
-            return;
-        }
-
-
-        if (
-            message.type ===
-            "NEXT_ROUND"
-        ) {
-
-            currentRound =
-                message.round;
-
-
-            applyScoreState(
-                message.state
-            );
-
-
-            resetLocalRound();
-
-
-            updateChallenge();
-
-
-            if (
-                role ===
-                "host"
-            ) {
-
-                updateHostGame();
-
-            } else {
-
-                updateParticipantLeaderboard();
-            }
-
-
-            return;
-        }
-
-
-        if (
-            message.type ===
-            "GAME_FINISHED"
-        ) {
-
-            applyScoreState(
-                message.state
-            );
-
-
-            stopRecognitionSafely();
-
-
-            showFinal();
-
-
-            return;
-        }
-
-
-        if (
-            message.type ===
-            "PLAYER_DISCONNECTED"
-        ) {
-
-            applyScoreState(
-                message.state
+            console.log(
+                "SERVER:",
+                message
             );
 
 
             if (
-                role ===
-                "host"
+                message.type ===
+                "ROOM_CREATED"
             ) {
+
+                roomCode =
+                    message.roomCode;
+
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                document
+                    .getElementById(
+                        "hostRoomCode"
+                    )
+                    .textContent =
+                    roomCode;
+
+
+                showScreen(
+                    "hostLobbyScreen"
+                );
+
 
                 updateLobby(
                     message.state
                 );
 
 
-                updateHostGame();
-
-            } else {
-
-                updateParticipantLeaderboard();
+                return;
             }
 
 
-            return;
-        }
+            if (
+                message.type ===
+                "JOINED_ROOM"
+            ) {
 
+                roomCode =
+                    message.roomCode;
+
+
+                playerId =
+                    message.playerId;
+
+
+                playerSlot =
+                    message.playerSlot;
+
+
+                playerName =
+                    message.state
+                        .players[
+                            playerSlot
+                        ]?.name || "";
+
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                document
+                    .getElementById(
+                        "participantRoomCode"
+                    )
+                    .textContent =
+                    roomCode;
+
+
+                showScreen(
+                    "participantLobbyScreen"
+                );
+
+
+                updateLobby(
+                    message.state
+                );
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "ROOM_UPDATED"
+            ) {
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                updateLobby(
+                    message.state
+                );
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "GAME_STARTED"
+            ) {
+
+                currentRound =
+                    message.round ||
+                    1;
+
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                resetLocalRound();
+
+
+                updateChallenge();
+
+
+                if (
+                    role ===
+                    "host"
+                ) {
+
+                    showScreen(
+                        "hostGameScreen"
+                    );
+
+
+                    updateHostGame();
+
+                } else {
+
+                    showScreen(
+                        "participantGameScreen"
+                    );
+
+
+                    updateParticipantLeaderboard();
+                }
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "SCORE_UPDATE"
+            ) {
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "NEXT_ROUND"
+            ) {
+
+                currentRound =
+                    message.round;
+
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                resetLocalRound();
+
+
+                updateChallenge();
+
+
+                if (
+                    role ===
+                    "host"
+                ) {
+
+                    updateHostGame();
+
+                } else {
+
+                    updateParticipantLeaderboard();
+                }
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "GAME_FINISHED"
+            ) {
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                stopRecognitionSafely();
+
+
+                showFinal();
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "PLAYER_DISCONNECTED"
+            ) {
+
+                applyScoreState(
+                    message.state
+                );
+
+
+                if (
+                    role ===
+                    "host"
+                ) {
+
+                    updateLobby(
+                        message.state
+                    );
+
+
+                    updateHostGame();
+
+                } else {
+
+                    updateParticipantLeaderboard();
+                }
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "HOST_DISCONNECTED"
+            ) {
+
+                alert(
+                    "The host has left the game."
+                );
+
+
+                location.reload();
+
+
+                return;
+            }
+
+
+            if (
+                message.type ===
+                "ERROR"
+            ) {
+
+                handleServerError(
+                    message.message
+                );
+
+
+                return;
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+    CONNECTION STATUS
+    ========================================================= */
+
+    socket.addEventListener(
+        "open",
+        () => {
+
+            console.log(
+                "Connected to SpeakUp server."
+            );
+
+        }
+    );
+
+
+    socket.addEventListener(
+        "close",
+        () => {
+
+            console.log(
+                "Disconnected from server."
+            );
+
+        }
+    );
+
+
+    socket.addEventListener(
+        "error",
+        error => {
+
+            console.error(
+                "WebSocket error:",
+                error
+            );
+
+        }
+    );
+
+
+    /* =========================================================
+    SERVER ERROR
+    ========================================================= */
+
+    function handleServerError(message) {
 
         if (
-            message.type ===
-            "HOST_DISCONNECTED"
+            role === "host"
         ) {
 
-            alert(
-                "The host has left the game."
-            );
+            const setup =
+                document.getElementById(
+                    "hostSetupScreen"
+                );
 
 
-            location.reload();
+            if (
+                setup &&
+                setup.classList.contains(
+                    "active"
+                )
+            ) {
+
+                showError(
+                    "hostSetupError",
+                    message
+                );
+
+            } else {
+
+                showError(
+                    "hostLobbyError",
+                    message
+                );
+            }
+
+        } else {
+
+            const setup =
+                document.getElementById(
+                    "participantSetupScreen"
+                );
 
 
+            if (
+                setup &&
+                setup.classList.contains(
+                    "active"
+                )
+            ) {
+
+                showError(
+                    "participantSetupError",
+                    message
+                );
+
+            } else {
+
+                alert(message);
+            }
+        }
+    }
+
+
+    /* =========================================================
+    APPLY SERVER SCORE STATE
+    ========================================================= */
+
+    function applyScoreState(state) {
+
+        if (!state) {
             return;
         }
 
 
-        if (
-            message.type ===
-            "ERROR"
-        ) {
+        if (state.roomCode) {
 
-            handleServerError(
-                message.message
-            );
-
-
-            return;
+            roomCode =
+                state.roomCode;
         }
 
-    }
-);
-
-
-/* =========================================================
-   CONNECTION STATUS
-   ========================================================= */
-
-socket.addEventListener(
-    "open",
-    () => {
-
-        console.log(
-            "Connected to SpeakUp server."
-        );
-
-    }
-);
-
-
-socket.addEventListener(
-    "close",
-    () => {
-
-        console.log(
-            "Disconnected from server."
-        );
-
-    }
-);
-
-
-socket.addEventListener(
-    "error",
-    error => {
-
-        console.error(
-            "WebSocket error:",
-            error
-        );
-
-    }
-);
-
-
-/* =========================================================
-   SERVER ERROR
-   ========================================================= */
-
-function handleServerError(message) {
-
-    if (
-        role === "host"
-    ) {
-
-        const setup =
-            document.getElementById(
-                "hostSetupScreen"
-            );
-
 
         if (
-            setup &&
-            setup.classList.contains(
-                "active"
+            Number.isInteger(
+                state.currentRound
             )
         ) {
 
-            showError(
-                "hostSetupError",
-                message
-            );
-
-        } else {
-
-            showError(
-                "hostLobbyError",
-                message
-            );
+            currentRound =
+                state.currentRound;
         }
 
-    } else {
 
-        const setup =
-            document.getElementById(
-                "participantSetupScreen"
-            );
+        if (state.players) {
 
+            if (
+                state.players.player1
+            ) {
 
-        if (
-            setup &&
-            setup.classList.contains(
-                "active"
-            )
-        ) {
+                players.player1 = {
 
-            showError(
-                "participantSetupError",
-                message
-            );
+                    id:
+                        state.players.player1.id,
 
-        } else {
+                    name:
+                        state.players.player1.name,
 
-            alert(message);
-        }
-    }
-}
+                    score:
+                        Number(
+                            state.players.player1.score
+                        ) || 0,
 
+                    total:
+                        Number(
+                            state.players.player1.total
+                        ) || 0,
 
-/* =========================================================
-   APPLY SERVER SCORE STATE
-   ========================================================= */
+                    position:
+                        Number(
+                            state.players.player1.position
+                        ) || 0,
 
-function applyScoreState(state) {
+                    submitted:
+                        Boolean(
+                            state.players.player1.submitted
+                        )
 
-    if (!state) {
-        return;
-    }
+                };
 
+            } else {
 
-    if (state.roomCode) {
+                players.player1 = {
 
-        roomCode =
-            state.roomCode;
-    }
+                    id: null,
+                    name: "",
+                    score: 0,
+                    total: 0,
+                    position: 0,
+                    submitted: false
 
-
-    if (
-        Number.isInteger(
-            state.currentRound
-        )
-    ) {
-
-        currentRound =
-            state.currentRound;
-    }
+                };
+            }
 
 
-    if (state.players) {
+            if (
+                state.players.player2
+            ) {
 
-        if (
-            state.players.player1
-        ) {
+                players.player2 = {
 
-            players.player1 = {
+                    id:
+                        state.players.player2.id,
 
-                id:
-                    state.players.player1.id,
+                    name:
+                        state.players.player2.name,
 
-                name:
-                    state.players.player1.name,
+                    score:
+                        Number(
+                            state.players.player2.score
+                        ) || 0,
 
-                score:
-                    Number(
-                        state.players.player1.score
-                    ) || 0,
+                    total:
+                        Number(
+                            state.players.player2.total
+                        ) || 0,
 
-                total:
-                    Number(
-                        state.players.player1.total
-                    ) || 0,
+                    position:
+                        Number(
+                            state.players.player2.position
+                        ) || 0,
 
-                position:
-                    Number(
-                        state.players.player1.position
-                    ) || 0,
+                    submitted:
+                        Boolean(
+                            state.players.player2.submitted
+                        )
 
-                submitted:
-                    Boolean(
-                        state.players.player1.submitted
-                    )
+                };
 
-            };
+            } else {
 
-        } else {
+                players.player2 = {
 
-            players.player1 = {
+                    id: null,
+                    name: "",
+                    score: 0,
+                    total: 0,
+                    position: 0,
+                    submitted: false
 
-                id: null,
-                name: "",
-                score: 0,
-                total: 0,
-                position: 0,
-                submitted: false
-
-            };
+                };
+            }
         }
 
 
         if (
-            state.players.player2
+            role ===
+            "host"
         ) {
 
-            players.player2 = {
-
-                id:
-                    state.players.player2.id,
-
-                name:
-                    state.players.player2.name,
-
-                score:
-                    Number(
-                        state.players.player2.score
-                    ) || 0,
-
-                total:
-                    Number(
-                        state.players.player2.total
-                    ) || 0,
-
-                position:
-                    Number(
-                        state.players.player2.position
-                    ) || 0,
-
-                submitted:
-                    Boolean(
-                        state.players.player2.submitted
-                    )
-
-            };
+            updateHostGame();
 
         } else {
 
-            players.player2 = {
-
-                id: null,
-                name: "",
-                score: 0,
-                total: 0,
-                position: 0,
-                submitted: false
-
-            };
+            updateParticipantLeaderboard();
         }
     }
 
 
-    if (
-        role ===
-        "host"
-    ) {
+    /* =========================================================
+    LOBBY
+    ========================================================= */
 
-        updateHostGame();
+    function updateLobby(state) {
 
-    } else {
-
-        updateParticipantLeaderboard();
-    }
-}
+        if (!state) {
+            return;
+        }
 
 
-/* =========================================================
-   LOBBY
-   ========================================================= */
-
-function updateLobby(state) {
-
-    if (!state) {
-        return;
-    }
+        const p1 =
+            state.players.player1;
 
 
-    const p1 =
-        state.players.player1;
+        const p2 =
+            state.players.player2;
 
 
-    const p2 =
-        state.players.player2;
+        updateLobbyPlayer(
+            "hostPlayer1",
+            "Player 1",
+            p1
+        );
 
 
-    updateLobbyPlayer(
-        "hostPlayer1",
-        "Player 1",
-        p1
-    );
-
-
-    updateLobbyPlayer(
-        "hostPlayer2",
-        "Player 2",
-        p2
-    );
-
-
-    updateLobbyPlayer(
-        "participantPlayer1",
-        "Player 1",
-        p1
-    );
-
-
-    updateLobbyPlayer(
-        "participantPlayer2",
-        "Player 2",
-        p2
-    );
-
-
-    const ready =
-        Boolean(
-            p1 &&
+        updateLobbyPlayer(
+            "hostPlayer2",
+            "Player 2",
             p2
         );
 
 
-    const startButton =
-        document.getElementById(
-            "startGameButton"
+        updateLobbyPlayer(
+            "participantPlayer1",
+            "Player 1",
+            p1
         );
 
 
-    if (startButton) {
-
-        startButton.disabled =
-            !ready;
-    }
-}
-
-
-function updateLobbyPlayer(
-    elementId,
-    fallback,
-    player
-) {
-
-    const element =
-        document.getElementById(
-            elementId
+        updateLobbyPlayer(
+            "participantPlayer2",
+            "Player 2",
+            p2
         );
 
 
-    if (!element) {
-        return;
-    }
-
-
-    if (player) {
-
-        element.innerHTML = `
-
-            <span>
-                ${escapeHtml(player.name)}
-            </span>
-
-            <span class="connected">
-                ✓ Connected
-            </span>
-
-        `;
-
-    } else {
-
-        element.innerHTML = `
-
-            <span>
-                ${fallback}
-            </span>
-
-            <span class="waiting">
-                Waiting...
-            </span>
-
-        `;
-    }
-}
-
-
-/* =========================================================
-   START GAME
-   ========================================================= */
-
-function startGame() {
-
-    if (
-        !players.player1.id ||
-        !players.player2.id
-    ) {
-
-        return;
-    }
-
-
-    socket.send(
-        JSON.stringify({
-
-            type:
-                "START_GAME"
-
-        })
-    );
-}
-
-
-/* =========================================================
-   CHALLENGE DISPLAY
-   ========================================================= */
-
-function updateChallenge() {
-
-    const challenge =
-        challenges[
-            currentRound - 1
-        ];
-
-
-    if (!challenge) {
-        return;
-    }
-
-
-    const participantChallenge =
-        document.getElementById(
-            "participantChallenge"
-        );
-
-
-    const participantType =
-        document.getElementById(
-            "participantChallengeType"
-        );
-
-
-    const hostChallenge =
-        document.getElementById(
-            "hostChallenge"
-        );
-
-
-    const roundBadge =
-        document.getElementById(
-            "participantRoundBadge"
-        );
-
-
-    const hostRoundBadge =
-        document.getElementById(
-            "hostRoundBadge"
-        );
-
-
-    if (participantChallenge) {
-
-        participantChallenge.textContent =
-            challenge.text;
-    }
-
-
-    if (participantType) {
-
-        participantType.textContent =
-            challenge.type.toUpperCase();
-    }
-
-
-    if (hostChallenge) {
-
-        hostChallenge.textContent =
-            challenge.text;
-    }
-
-
-    if (roundBadge) {
-
-        roundBadge.textContent =
-            `ROUND ${currentRound} / 20`;
-    }
-
-
-    if (hostRoundBadge) {
-
-        hostRoundBadge.textContent =
-            `ROUND ${currentRound} / 20`;
-    }
-}
-
-
-/* =========================================================
-   SPEECH RECOGNITION
-   ========================================================= */
-
-const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-
-if (SpeechRecognition) {
-
-    recognition =
-        new SpeechRecognition();
-
-
-    recognition.lang =
-        "en-US";
-
-
-    recognition.continuous =
-        true;
-
-
-    recognition.interimResults =
-        true;
-
-
-    recognition.maxAlternatives =
-        1;
-
-
-    /* =====================================================
-       RECOGNITION START
-       ===================================================== */
-
-    recognition.onstart =
-        () => {
-
-            isListening =
-                true;
-
-
-            speechStartTime =
-                performance.now();
-
-
-            speechElapsedSeconds =
-                0;
-
-
-            const button =
-                document.getElementById(
-                    "speakButton"
-                );
-
-
-            if (button) {
-
-                button.classList.add(
-                    "listening"
-                );
-
-
-                button.innerHTML =
-                    "⏹️<br>STOP";
-            }
-        };
-
-
-    /* =====================================================
-       RECOGNITION RESULT
-       ===================================================== */
-
-    recognition.onresult =
-        event => {
-
-            let finalParts =
-                [];
-
-            let interimParts =
-                [];
-
-
-            for (
-                let i =
-                    event.resultIndex;
-
-                i <
-                event.results.length;
-
-                i++
-            ) {
-
-                const result =
-                    event.results[i];
-
-
-                if (
-                    !result ||
-                    !result[0]
-                ) {
-
-                    continue;
-                }
-
-
-                const text =
-                    result[0]
-                        .transcript
-                        .trim();
-
-
-                if (!text) {
-                    continue;
-                }
-
-
-                if (
-                    result.isFinal
-                ) {
-
-                    finalParts.push(
-                        text
-                    );
-
-
-                    if (
-                        typeof
-                        result[0].confidence ===
-                        "number" &&
-
-                        result[0].confidence >
-                        0
-                    ) {
-
-                        recognitionConfidenceTotal +=
-                            result[0].confidence;
-
-
-                        recognitionConfidenceCount++;
-                    }
-
-                } else {
-
-                    interimParts.push(
-                        text
-                    );
-                }
-            }
-
-
-            if (
-                finalParts.length >
-                0
-            ) {
-
-                finalTranscript =
-                    (
-                        finalTranscript +
-                        " " +
-                        finalParts.join(" ")
-                    )
-                    .replace(
-                        /\s+/g,
-                        " "
-                    )
-                    .trim();
-            }
-
-
-            interimTranscript =
-                interimParts
-                    .join(" ")
-                    .replace(
-                        /\s+/g,
-                        " "
-                    )
-                    .trim();
-
-
-            const displayText =
-                (
-                    finalTranscript +
-                    " " +
-                    interimTranscript
-                )
-                .replace(
-                    /\s+/g,
-                    " "
-                )
-                .trim();
-
-
-            const transcript =
-                document.getElementById(
-                    "transcript"
-                );
-
-
-            if (transcript) {
-
-                transcript.textContent =
-                    displayText ||
-                    "Listening...";
-            }
-        };
-
-
-    /* =====================================================
-       RECOGNITION ERROR
-       ===================================================== */
-
-    recognition.onerror =
-        event => {
-
-            console.log(
-                "Speech recognition error:",
-                event.error
+        const ready =
+            Boolean(
+                p1 &&
+                p2
             );
 
 
-            isListening =
-                false;
+        const startButton =
+            document.getElementById(
+                "startGameButton"
+            );
 
 
-            pendingSubmit =
-                false;
+        if (startButton) {
+
+            startButton.disabled =
+                !ready;
+        }
+    }
 
 
-            const button =
-                document.getElementById(
-                    "speakButton"
-                );
+    function updateLobbyPlayer(
+        elementId,
+        fallback,
+        player
+    ) {
+
+        const element =
+            document.getElementById(
+                elementId
+            );
 
 
-            if (button) {
-
-                button.classList.remove(
-                    "listening"
-                );
+        if (!element) {
+            return;
+        }
 
 
-                button.innerHTML =
-                    "🎤<br>SPEAK";
-            }
+        if (player) {
+
+            element.innerHTML = `
+
+                <span>
+                    ${escapeHtml(player.name)}
+                </span>
+
+                <span class="connected">
+                    ✓ Connected
+                </span>
+
+            `;
+
+        } else {
+
+            element.innerHTML = `
+
+                <span>
+                    ${fallback}
+                </span>
+
+                <span class="waiting">
+                    Waiting...
+                </span>
+
+            `;
+        }
+    }
 
 
-            if (
-                event.error ===
-                "not-allowed"
-            ) {
+    /* =========================================================
+    START GAME
+    ========================================================= */
 
-                alert(
-                    "Microphone access was blocked. Please allow microphone access for SpeakUp in your browser settings."
-                );
+    function startGame() {
 
-            } else if (
-                event.error ===
-                "audio-capture"
-            ) {
+        if (
+            !players.player1.id ||
+            !players.player2.id
+        ) {
 
-                alert(
-                    "No microphone could be detected. Please check your microphone."
-                );
-
-            } else if (
-                event.error ===
-                "no-speech"
-            ) {
-
-                console.log(
-                    "No speech detected."
-                );
-
-            } else if (
-                event.error ===
-                "network"
-            ) {
-
-                alert(
-                    "Speech recognition could not connect to the browser speech service. Please check your internet connection."
-                );
-            }
-        };
+            return;
+        }
 
 
-    /* =====================================================
-       RECOGNITION END
-       ===================================================== */
+        socket.send(
+            JSON.stringify({
 
-    recognition.onend =
-        () => {
+                type:
+                    "START_GAME"
 
-            if (
-                speechStartTime >
-                0
-            ) {
+            })
+        );
+    }
+
+
+    /* =========================================================
+    CHALLENGE DISPLAY
+    ========================================================= */
+
+    function updateChallenge() {
+
+        const challenge =
+            challenges[
+                currentRound - 1
+            ];
+
+
+        if (!challenge) {
+            return;
+        }
+
+
+        const participantChallenge =
+            document.getElementById(
+                "participantChallenge"
+            );
+
+
+        const participantType =
+            document.getElementById(
+                "participantChallengeType"
+            );
+
+
+        const hostChallenge =
+            document.getElementById(
+                "hostChallenge"
+            );
+
+
+        const roundBadge =
+            document.getElementById(
+                "participantRoundBadge"
+            );
+
+
+        const hostRoundBadge =
+            document.getElementById(
+                "hostRoundBadge"
+            );
+
+
+        if (participantChallenge) {
+
+            participantChallenge.textContent =
+                challenge.text;
+        }
+
+
+        if (participantType) {
+
+            participantType.textContent =
+                challenge.type.toUpperCase();
+        }
+
+
+        if (hostChallenge) {
+
+            hostChallenge.textContent =
+                challenge.text;
+        }
+
+
+        if (roundBadge) {
+
+            roundBadge.textContent =
+                `ROUND ${currentRound} / 20`;
+        }
+
+
+        if (hostRoundBadge) {
+
+            hostRoundBadge.textContent =
+                `ROUND ${currentRound} / 20`;
+        }
+    }
+
+
+    /* =========================================================
+    SPEECH RECOGNITION
+    ========================================================= */
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+    if (SpeechRecognition) {
+
+        recognition =
+            new SpeechRecognition();
+
+
+        recognition.lang =
+            "en-US";
+
+
+        recognition.continuous =
+            true;
+
+
+        recognition.interimResults =
+            true;
+
+
+        recognition.maxAlternatives =
+            1;
+
+        /* =====================================================
+        RECOGNITION START
+        ===================================================== */
+
+        recognition.onstart =
+            () => {
+
+                isListening =
+                    true;
+
+
+                speechStartTime =
+                    performance.now();
+
 
                 speechElapsedSeconds =
+                    0;
+
+
+                const button =
+                    document.getElementById(
+                        "speakButton"
+                    );
+
+
+                if (button) {
+
+                    button.classList.add(
+                        "listening"
+                    );
+
+
+                    button.innerHTML =
+                        "⏹️<br>STOP";
+                }
+            };
+
+
+        /* =====================================================
+        RECOGNITION RESULT
+        ===================================================== */
+
+        recognition.onresult =
+            event => {
+
+                let finalParts =
+                    [];
+
+                let interimParts =
+                    [];
+
+
+                for (
+                    let i =
+                        event.resultIndex;
+
+                    i <
+                    event.results.length;
+
+                    i++
+                ) {
+
+                    const result =
+                        event.results[i];
+
+
+                    if (
+                        !result ||
+                        !result[0]
+                    ) {
+
+                        continue;
+                    }
+
+
+                    const text =
+                        result[0]
+                            .transcript
+                            .trim();
+
+
+                    if (!text) {
+                        continue;
+                    }
+
+
+                    if (
+                        result.isFinal
+                    ) {
+
+                        finalParts.push(
+                            text
+                        );
+
+
+                        if (
+                            typeof
+                            result[0].confidence ===
+                            "number" &&
+
+                            result[0].confidence >
+                            0
+                        ) {
+
+                            recognitionConfidenceTotal +=
+                                result[0].confidence;
+
+
+                            recognitionConfidenceCount++;
+                        }
+
+                    } else {
+
+                        interimParts.push(
+                            text
+                        );
+                    }
+                }
+
+
+                if (
+                    finalParts.length >
+                    0
+                ) {
+
+                    finalTranscript =
+                        (
+                            finalTranscript +
+                            " " +
+                            finalParts.join(" ")
+                        )
+                        .replace(
+                            /\s+/g,
+                            " "
+                        )
+                        .trim();
+                }
+
+
+                interimTranscript =
+                    interimParts
+                        .join(" ")
+                        .replace(
+                            /\s+/g,
+                            " "
+                        )
+                        .trim();
+
+
+                const displayText =
                     (
-                        performance.now() -
-                        speechStartTime
-                    ) / 1000;
-            }
+                        finalTranscript +
+                        " " +
+                        interimTranscript
+                    )
+                    .replace(
+                        /\s+/g,
+                        " "
+                    )
+                    .trim();
 
 
-            isListening =
-                false;
+                const transcript =
+                    document.getElementById(
+                        "transcript"
+                    );
 
 
-            const button =
-                document.getElementById(
-                    "speakButton"
+                if (transcript) {
+
+                    transcript.textContent =
+                        displayText ||
+                        "Listening...";
+                }
+            };
+
+
+        /* =====================================================
+        RECOGNITION ERROR
+        ===================================================== */
+
+        recognition.onerror =
+            event => {
+
+                console.log(
+                    "Speech recognition error:",
+                    event.error
                 );
 
 
-            if (button) {
+                isListening =
+                    false;
 
-                button.classList.remove(
-                    "listening"
-                );
-
-
-                button.innerHTML =
-                    "🎤<br>SPEAK";
-            }
-
-
-            if (
-                pendingSubmit
-            ) {
 
                 pendingSubmit =
                     false;
 
 
-                setTimeout(
-                    () => {
+                const button =
+                    document.getElementById(
+                        "speakButton"
+                    );
 
-                        submitAnswer();
 
-                    },
-                    200
-                );
-            }
-        };
+                if (button) {
 
-} else {
+                    button.classList.remove(
+                        "listening"
+                    );
 
-    console.warn(
-        "SpeechRecognition is not supported by this browser."
-    );
+
+                    button.innerHTML =
+                        "🎤<br>SPEAK";
+                }
+
+
+                if (
+                    event.error ===
+                    "not-allowed"
+                ) {
+
+                    alert(
+                        "Microphone access was blocked. Please allow microphone access for SpeakUp in your browser settings."
+                    );
+
+                } else if (
+                    event.error ===
+                    "audio-capture"
+                ) {
+
+                    alert(
+                        "No microphone could be detected. Please check your microphone."
+                    );
+
+                } else if (
+                    event.error ===
+                    "no-speech"
+                ) {
+
+                    console.log(
+                        "No speech detected."
+                    );
+
+                } else if (
+                    event.error ===
+                    "network"
+                ) {
+
+                    alert(
+                        "Speech recognition could not connect to the browser speech service. Please check your internet connection."
+                    );
+                }
+            };
+
+
+        /* =====================================================
+        RECOGNITION END
+        ===================================================== */
+
+        recognition.onend =
+    () => {
+
+        if (
+            speechStartTime >
+            0
+        ) {
+
+            speechElapsedSeconds =
+                (
+                    performance.now() -
+                    speechStartTime
+                ) / 1000;
+        }
+
+        isListening =
+            false;
+
+        const button =
+            document.getElementById(
+                "speakButton"
+            );
+
+        if (button) {
+
+            button.classList.remove(
+                "listening"
+            );
+
+            button.innerHTML =
+                "🎤<br>SPEAK";
+        }
+
+        pendingSubmit =
+            false;
+
+        const submitButton =
+            document.getElementById(
+                "submitButton"
+            );
+
+        if (
+            submitButton &&
+            finalTranscript.trim() &&
+            !(
+                playerSlot &&
+                players[playerSlot] &&
+                players[playerSlot].submitted
+            )
+        ) {
+
+            submitButton.disabled =
+                false;
+        }
+    };
+
 }
 
 
-/* =========================================================
-   MICROPHONE PERMISSION
-   ========================================================= */
+    /* =========================================================
+    MICROPHONE PERMISSION
+    ========================================================= */
 
-async function ensureMicrophonePermission() {
+    async function ensureMicrophonePermission() {
 
-    if (
-        microphonePermissionGranted
-    ) {
+        if (
+            microphonePermissionGranted
+        ) {
 
-        return true;
-    }
-
-
-    if (
-        navigator.permissions &&
-        navigator.permissions.query
-    ) {
-
-        try {
-
-            const permission =
-                await navigator.permissions.query({
-                    name:
-                        "microphone"
-                });
+            return true;
+        }
 
 
-            if (
-                permission.state ===
-                "granted"
-            ) {
+        if (
+            navigator.permissions &&
+            navigator.permissions.query
+        ) {
+
+            try {
+
+                const permission =
+                    await navigator.permissions.query({
+                        name:
+                            "microphone"
+                    });
+
+
+                if (
+                    permission.state ===
+                    "granted"
+                ) {
+
+                    microphonePermissionGranted =
+                        true;
+
+
+                    return true;
+                }
+
+
+                if (
+                    permission.state ===
+                    "denied"
+                ) {
+
+                    alert(
+                        "Microphone access is blocked for SpeakUp. Please change the microphone permission for this site to Allow."
+                    );
+
+
+                    return false;
+                }
+
+            } catch (error) {
+
+                console.log(
+                    "Microphone permission query unavailable:",
+                    error
+                );
+            }
+        }
+
+
+        if (
+            navigator.mediaDevices &&
+            navigator.mediaDevices.getUserMedia
+        ) {
+
+            try {
+
+                const stream =
+                    await navigator
+                        .mediaDevices
+                        .getUserMedia({
+                            audio:
+                                true
+                        });
+
+
+                stream
+                    .getTracks()
+                    .forEach(
+                        track =>
+                            track.stop()
+                    );
+
 
                 microphonePermissionGranted =
                     true;
 
 
                 return true;
-            }
 
+            } catch (error) {
 
-            if (
-                permission.state ===
-                "denied"
-            ) {
+                console.error(
+                    "Microphone permission error:",
+                    error
+                );
+
 
                 alert(
-                    "Microphone access is blocked for SpeakUp. Please change the microphone permission for this site to Allow."
+                    "Please allow microphone access for SpeakUp, then try again."
                 );
 
 
                 return false;
             }
-
-        } catch (error) {
-
-            console.log(
-                "Microphone permission query unavailable:",
-                error
-            );
         }
+
+
+        return true;
     }
 
 
-    if (
-        navigator.mediaDevices &&
-        navigator.mediaDevices.getUserMedia
-    ) {
+    /* =========================================================
+    START / STOP SPEAKING
+    ========================================================= */
 
-        try {
+    async function toggleListening() {
 
-            const stream =
-                await navigator
-                    .mediaDevices
-                    .getUserMedia({
-                        audio:
-                            true
-                    });
-
-
-            stream
-                .getTracks()
-                .forEach(
-                    track =>
-                        track.stop()
-                );
-
-
-            microphonePermissionGranted =
-                true;
-
-
-            return true;
-
-        } catch (error) {
-
-            console.error(
-                "Microphone permission error:",
-                error
-            );
-
+        if (!recognition) {
 
             alert(
-                "Please allow microphone access for SpeakUp, then try again."
+                "Speech recognition is not supported by this browser. Try Google Chrome or Microsoft Edge."
             );
 
 
-            return false;
+            return;
         }
-    }
 
 
-    return true;
-}
+        if (
+            playerSlot &&
+            players[playerSlot]?.submitted
+        ) {
+
+            return;
+        }
 
 
-/* =========================================================
-   START / STOP SPEAKING
-   ========================================================= */
-
-async function toggleListening() {
-
-    if (!recognition) {
-
-        alert(
-            "Speech recognition is not supported by this browser. Try Google Chrome or Microsoft Edge."
-        );
-
-
-        return;
-    }
-
-
-    if (
-        playerSlot &&
-        players[playerSlot]?.submitted
-    ) {
-
-        return;
-    }
-
-
-    if (isListening) {
-
-        pendingSubmit =
-            true;
-
-
-        try {
-
-            recognition.stop();
-
-        } catch (error) {
-
-            console.log(
-                "Recognition stop error:",
-                error
-            );
-
+        if (isListening) {
 
             pendingSubmit =
                 false;
+
+            try {
+
+                recognition.stop();
+
+            } catch (error) {
+
+                console.log(
+                    "Recognition stop error:",
+                    error
+                );
+            }
+
+            return;
         }
 
 
-        return;
+        await startListening();
     }
 
 
-    await startListening();
-}
+    /* =========================================================
+    START LISTENING
+    ========================================================= */
+
+    async function startListening() {
+
+        finalTranscript =
+            "";
+
+        interimTranscript =
+            "";
+
+        recognitionConfidenceTotal =
+            0;
+
+        recognitionConfidenceCount =
+            0;
+
+        pendingSubmit =
+            false;
+
+        speechStartTime =
+            0;
+
+        speechElapsedSeconds =
+            0;
 
 
-/* =========================================================
-   START LISTENING
-   ========================================================= */
+        const transcript =
+            document.getElementById(
+                "transcript"
+            );
 
-async function startListening() {
-
-    finalTranscript =
-        "";
-
-    interimTranscript =
-        "";
-
-    recognitionConfidenceTotal =
-        0;
-
-    recognitionConfidenceCount =
-        0;
-
-    pendingSubmit =
-        false;
-
-    speechStartTime =
-        0;
-
-    speechElapsedSeconds =
-        0;
-
-
-    const transcript =
-        document.getElementById(
-            "transcript"
-        );
-
-
-    if (transcript) {
-
-        transcript.textContent =
-            "Checking microphone...";
-    }
-
-
-    const submitButton =
-        document.getElementById(
-            "submitButton"
-        );
-
-
-    if (submitButton) {
-
-        submitButton.disabled =
-            true;
-    }
-
-
-    const microphoneReady =
-        await ensureMicrophonePermission();
-
-
-    if (!microphoneReady) {
 
         if (transcript) {
 
             transcript.textContent =
-                "Microphone permission required.";
+                "Checking microphone...";
         }
 
 
-        return;
+        const submitButton =
+            document.getElementById(
+                "submitButton"
+            );
+
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                true;
+        }
+
+
+        const microphoneReady =
+            await ensureMicrophonePermission();
+
+
+        if (!microphoneReady) {
+
+            if (transcript) {
+
+                transcript.textContent =
+                    "Microphone permission required.";
+            }
+
+
+            return;
+        }
+
+
+        if (transcript) {
+
+            transcript.textContent =
+                "Listening...";
+        }
+
+
+        try {
+
+            recognition.start();
+
+        } catch (error) {
+
+            console.log(
+                "Recognition start error:",
+                error
+            );
+        }
     }
 
 
-    if (transcript) {
-
-        transcript.textContent =
-            "Listening...";
-    }
-
-
-    try {
-
-        recognition.start();
-
-    } catch (error) {
-
-        console.log(
-            "Recognition start error:",
-            error
-        );
-    }
-}
-
-
-/* =========================================================
-   SUBMIT ANSWER
-   ========================================================= */
-
-function submitAnswer() {
-
-    if (!playerSlot) {
-        return;
-    }
-
-
-    if (
-        players[playerSlot]?.submitted
-    ) {
-
-        return;
-    }
-
-
-    /*
-        ONLY FINALIZED SPEECH IS USED.
-    */
-
-    const text =
-        finalTranscript
-            .trim();
-
-
-    if (!text) {
-
-        alert(
-            "Please speak your answer first."
-        );
-
-
-        return;
-    }
-
-
-    const challenge =
-        challenges[
-            currentRound - 1
-        ];
-
-
-    const confidence =
-        recognitionConfidenceCount >
-        0
-
-            ? (
-                recognitionConfidenceTotal /
-                recognitionConfidenceCount
-            )
-
-            : 0;
-
-
-    const score =
-        evaluateAnswer(
-            text,
-            challenge,
-            confidence
-        );
-
-
-    console.log(
-        "Final transcript:",
-        text
-    );
-
-
-    console.log(
-        "Recognition confidence:",
-        confidence
-    );
-
-
-    console.log(
-        "Speech time:",
-        speechElapsedSeconds,
-        "seconds"
-    );
-
-
-    console.log(
-        "Final score:",
-        score
-    );
-
-
-    socket.send(
-        JSON.stringify({
-
-            type:
-                "ANSWER_SUBMITTED",
-
-            score:
-                score
-
-        })
-    );
-
-
-    const submitButton =
-        document.getElementById(
-            "submitButton"
-        );
-
-
-    const speakButton =
-        document.getElementById(
-            "speakButton"
-        );
-
-
-    if (submitButton) {
-
-        submitButton.disabled =
-            true;
-    }
-
-
-    if (speakButton) {
-
-        speakButton.disabled =
-            true;
-    }
-
-
-    /*
-        KEEP TRANSCRIPT CLEAN.
-    */
-
-    const transcript =
-        document.getElementById(
-            "transcript"
-        );
-
-
-    if (transcript) {
-
-        transcript.textContent =
-            text;
-    }
-
-
-    /*
-        SHOW SCORE IN ITS OWN BOX.
-    */
-
-    const scoreResult =
-        document.getElementById(
-            "scoreResult"
-        );
-
-
-    const scoreValue =
-        document.getElementById(
-            "scoreValue"
-        );
-
-
-    if (scoreResult) {
-
-        scoreResult.classList.remove(
-            "hidden"
-        );
-    }
-
-
-    if (scoreValue) {
-
-        scoreValue.textContent =
-            `${score} / 100`;
-    }
-}
-
-
-/* =========================================================
-   ANSWER EVALUATION
-   ========================================================= */
-
-function evaluateAnswer(
-    answer,
-    challenge,
-    confidence = 0
-) {
-
-    const cleanAnswer =
-        normalizeText(answer);
-
-
-    const cleanQuestion =
-        normalizeText(
-            challenge.text
-        );
-
-
-    if (!cleanAnswer) {
-        return 0;
-    }
-
-
-    const safeConfidence =
-        Math.max(
-            0,
-            Math.min(
-                1,
-                Number(confidence) || 0
-            )
-        );
-
-
-    /* =====================================================
-       SENTENCE CHALLENGES
-       ===================================================== */
-
-    if (
-        challenge.type ===
-        "pronunciation"
-    ) {
-
-        const answerWords =
-            cleanAnswer
-                .split(" ")
-                .filter(Boolean);
-
-
-        const questionWords =
-            cleanQuestion
-                .split(" ")
-                .filter(Boolean);
+    /* =========================================================
+    SUBMIT ANSWER
+    ========================================================= */
+
+    function submitAnswer() {
+
+        if (!playerSlot) {
+            return;
+        }
 
 
         if (
-            questionWords.length ===
-            0
+            players[playerSlot]?.submitted
         ) {
 
-            return 0;
+            return;
         }
 
 
-        const rows =
-            questionWords.length +
-            1;
+        /*
+            ONLY FINALIZED SPEECH IS USED.
+        */
+
+        const text =
+            finalTranscript
+                .trim();
 
 
-        const columns =
-            answerWords.length +
-            1;
+        if (!text) {
 
-
-        const matrix =
-            Array.from(
-                {
-                    length:
-                        rows
-                },
-
-                () =>
-                    Array(
-                        columns
-                    ).fill(0)
+            alert(
+                "Please speak your answer first."
             );
 
 
-        for (
-            let i = 0;
-            i < rows;
-            i++
-        ) {
-
-            matrix[i][0] =
-                i;
+            return;
         }
 
 
-        for (
-            let j = 0;
-            j < columns;
-            j++
-        ) {
-
-            matrix[0][j] =
-                j;
-        }
-
-
-        for (
-            let i = 1;
-            i < rows;
-            i++
-        ) {
-
-            for (
-                let j = 1;
-                j < columns;
-                j++
-            ) {
-
-                const sameWord =
-                    questionWords[
-                        i - 1
-                    ] ===
-                    answerWords[
-                        j - 1
-                    ];
-
-
-                if (sameWord) {
-
-                    matrix[i][j] =
-                        matrix[
-                            i - 1
-                        ][
-                            j - 1
-                        ];
-
-                } else {
-
-                    matrix[i][j] =
-                        Math.min(
-
-                            matrix[
-                                i - 1
-                            ][
-                                j
-                            ] + 1,
-
-                            matrix[
-                                i
-                            ][
-                                j - 1
-                            ] + 1,
-
-                            matrix[
-                                i - 1
-                            ][
-                                j - 1
-                            ] + 1
-
-                        );
-                }
-            }
-        }
-
-
-        const editDistance =
-            matrix[
-                rows - 1
-            ][
-                columns - 1
+        const challenge =
+            challenges[
+                currentRound - 1
             ];
 
 
-        const comparisonLength =
-            Math.max(
-                questionWords.length,
-                answerWords.length
-            );
+        const confidence =
+            recognitionConfidenceCount >
+            0
 
-
-        const sequenceSimilarity =
-            comparisonLength > 0
-
-                ? Math.max(
-                    0,
-                    1 -
-                    (
-                        editDistance /
-                        comparisonLength
-                    )
+                ? (
+                    recognitionConfidenceTotal /
+                    recognitionConfidenceCount
                 )
 
                 : 0;
 
 
-        /* =================================================
-           ACCURACY = 80 POINTS
-           ================================================= */
-
-        const accuracyScore =
-            Math.pow(
-                sequenceSimilarity,
-                0.65
-            ) * 300;
-
-
-        /* =================================================
-           ASR CONFIDENCE = 10 POINTS
-           ================================================= */
-
-        const confidenceScore =
-            safeConfidence *
-            10;
-
-
-        /* =================================================
-           SPEED = 10 POINTS
-           ================================================= */
-
-        const expectedSeconds =
-            Math.max(
-                3,
-                questionWords.length *
-                0.60
+        const score =
+            evaluateAnswer(
+                text,
+                challenge,
+                confidence
             );
 
 
-        const actualSeconds =
-            Math.max(
-                0.5,
-                Number(
-                    speechElapsedSeconds
-                ) ||
-                expectedSeconds * 2
+        console.log(
+            "Final transcript:",
+            text
+        );
+
+
+        console.log(
+            "Recognition confidence:",
+            confidence
+        );
+
+
+        console.log(
+            "Speech time:",
+            speechElapsedSeconds,
+            "seconds"
+        );
+
+
+        console.log(
+            "Final score:",
+            score
+        );
+
+
+        socket.send(
+            JSON.stringify({
+
+                type:
+                    "ANSWER_SUBMITTED",
+
+                score:
+                    score
+
+            })
+        );
+
+
+        const submitButton =
+            document.getElementById(
+                "submitButton"
             );
 
 
-        let speedScore =
-            (
-                1 -
-                (
-                    actualSeconds /
-                    (
-                        expectedSeconds *
-                        2
-                    )
-                )
-            ) *
-            10;
-
-
-        speedScore =
-            Math.max(
-                0,
-                Math.min(
-                    10,
-                    speedScore
-                )
+        const speakButton =
+            document.getElementById(
+                "speakButton"
             );
 
 
-        if (
-            sequenceSimilarity <
-            0.50
-        ) {
+        if (submitButton) {
 
-            speedScore =
-                0;
+            submitButton.disabled =
+                true;
         }
 
 
-        /* =================================================
-           FINAL SCORE
-           ================================================= */
+        if (speakButton) {
+
+            speakButton.disabled =
+                true;
+        }
+
+
+        /*
+            KEEP TRANSCRIPT CLEAN.
+        */
+
+        const transcript =
+            document.getElementById(
+                "transcript"
+            );
+
+
+        if (transcript) {
+
+            transcript.textContent =
+                text;
+        }
+
+
+        /*
+            SHOW SCORE IN ITS OWN BOX.
+        */
+
+        const scoreResult =
+            document.getElementById(
+                "scoreResult"
+            );
+
+
+        const scoreValue =
+            document.getElementById(
+                "scoreValue"
+            );
+
+
+        if (scoreResult) {
+
+            scoreResult.classList.remove(
+                "hidden"
+            );
+        }
+
+
+        if (scoreValue) {
+
+            scoreValue.textContent =
+                `${score} / 100`;
+        }
+    }
+
+
+    /* =========================================================
+    ANSWER EVALUATION
+    ========================================================= */
+
+    function evaluateAnswer(
+        answer,
+        challenge,
+        confidence = 0
+    ) {
+
+        const cleanAnswer =
+            normalizeText(answer);
+
+
+        const cleanQuestion =
+            normalizeText(
+                challenge.text
+            );
+
+
+        if (!cleanAnswer) {
+            return 0;
+        }
+
+
+        const safeConfidence =
+            Math.max(
+                0,
+                Math.min(
+                    1,
+                    Number(confidence) || 0
+                )
+            );
+
+
+        /* =====================================================
+        SENTENCE CHALLENGES
+        ===================================================== */
+
+        if (
+            challenge.type ===
+            "pronunciation"
+        ) {
+
+            const answerWords =
+                cleanAnswer
+                    .split(" ")
+                    .filter(Boolean);
+
+
+            const questionWords =
+                cleanQuestion
+                    .split(" ")
+                    .filter(Boolean);
+
+
+            if (
+                questionWords.length ===
+                0
+            ) {
+
+                return 0;
+            }
+
+
+            const rows =
+                questionWords.length +
+                1;
+
+
+            const columns =
+                answerWords.length +
+                1;
+
+
+            const matrix =
+                Array.from(
+                    {
+                        length:
+                            rows
+                    },
+
+                    () =>
+                        Array(
+                            columns
+                        ).fill(0)
+                );
+
+
+            for (
+                let i = 0;
+                i < rows;
+                i++
+            ) {
+
+                matrix[i][0] =
+                    i;
+            }
+
+
+            for (
+                let j = 0;
+                j < columns;
+                j++
+            ) {
+
+                matrix[0][j] =
+                    j;
+            }
+
+
+            for (
+                let i = 1;
+                i < rows;
+                i++
+            ) {
+
+                for (
+                    let j = 1;
+                    j < columns;
+                    j++
+                ) {
+
+                    const sameWord =
+                        questionWords[
+                            i - 1
+                        ] ===
+                        answerWords[
+                            j - 1
+                        ];
+
+
+                    if (sameWord) {
+
+                        matrix[i][j] =
+                            matrix[
+                                i - 1
+                            ][
+                                j - 1
+                            ];
+
+                    } else {
+
+                        matrix[i][j] =
+                            Math.min(
+
+                                matrix[
+                                    i - 1
+                                ][
+                                    j
+                                ] + 1,
+
+                                matrix[
+                                    i
+                                ][
+                                    j - 1
+                                ] + 1,
+
+                                matrix[
+                                    i - 1
+                                ][
+                                    j - 1
+                                ] + 1
+
+                            );
+                    }
+                }
+            }
+
+
+            const editDistance =
+                matrix[
+                    rows - 1
+                ][
+                    columns - 1
+                ];
+
+
+            const comparisonLength =
+                Math.max(
+                    questionWords.length,
+                    answerWords.length
+                );
+
+
+            const sequenceSimilarity =
+                comparisonLength > 0
+
+                    ? Math.max(
+                        0,
+                        1 -
+                        (
+                            editDistance /
+                            comparisonLength
+                        )
+                    )
+
+                    : 0;
+
+
+            /* =================================================
+            ACCURACY = 80 POINTS
+            ================================================= */
+
+            const accuracyScore =
+                Math.pow(
+                    sequenceSimilarity,
+                    0.65
+                ) * 300;
+
+
+            /* =================================================
+            ASR CONFIDENCE = 10 POINTS
+            ================================================= */
+
+            const confidenceScore =
+                safeConfidence *
+                10;
+
+
+            /* =================================================
+            SPEED = 10 POINTS
+            ================================================= */
+
+            const expectedSeconds =
+                Math.max(
+                    3,
+                    questionWords.length *
+                    0.60
+                );
+
+
+            const actualSeconds =
+                Math.max(
+                    0.5,
+                    Number(
+                        speechElapsedSeconds
+                    ) ||
+                    expectedSeconds * 2
+                );
+
+
+            let speedScore =
+                (
+                    1 -
+                    (
+                        actualSeconds /
+                        (
+                            expectedSeconds *
+                            2
+                        )
+                    )
+                ) *
+                10;
+
+
+            speedScore =
+                Math.max(
+                    0,
+                    Math.min(
+                        10,
+                        speedScore
+                    )
+                );
+
+
+            if (
+                sequenceSimilarity <
+                0.50
+            ) {
+
+                speedScore =
+                    0;
+            }
+
+
+            /* =================================================
+            FINAL SCORE
+            ================================================= */
+
+            let score =
+                accuracyScore +
+                confidenceScore +
+                speedScore;
+
+
+            if (
+                cleanAnswer ===
+                cleanQuestion
+            ) {
+
+                score =
+                    80 +
+                    confidenceScore +
+                    speedScore;
+            }
+
+
+            return Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(score)
+                )
+            );
+        }
+
+
+        /* =====================================================
+        OPEN QUESTIONS
+        ===================================================== */
+
+        const words =
+            cleanAnswer
+                .split(" ")
+                .filter(Boolean);
+
+
+        const uniqueWords =
+            new Set(words);
+
 
         let score =
-            accuracyScore +
-            confidenceScore +
-            speedScore;
+            30;
 
 
         if (
-            cleanAnswer ===
-            cleanQuestion
+            words.length >=
+            5
         ) {
 
-            score =
-                80 +
-                confidenceScore +
-                speedScore;
+            score +=
+                15;
+        }
+
+
+        if (
+            words.length >=
+            10
+        ) {
+
+            score +=
+                15;
+        }
+
+
+        if (
+            words.length >=
+            18
+        ) {
+
+            score +=
+                10;
+        }
+
+
+        if (
+            uniqueWords.size >=
+            6
+        ) {
+
+            score +=
+                5;
+        }
+
+
+        if (
+            uniqueWords.size >=
+            10
+        ) {
+
+            score +=
+                5;
+        }
+
+
+        const usefulWords = [
+
+            "because",
+            "important",
+            "help",
+            "helps",
+            "good",
+            "better",
+            "school",
+            "student",
+            "students",
+            "community",
+            "technology",
+            "education",
+            "communication",
+            "exercise",
+            "friend",
+            "future",
+            "leader",
+            "leadership",
+            "social",
+            "media",
+            "problem",
+            "solution",
+            "solve",
+            "improve",
+            "learning",
+            "study",
+            "studying"
+
+        ];
+
+
+        usefulWords.forEach(
+            word => {
+
+                if (
+                    words.includes(
+                        word
+                    )
+                ) {
+
+                    score +=
+                        2;
+                }
+            }
+        );
+
+
+        if (
+            safeConfidence >
+            0
+        ) {
+
+            score +=
+                Math.round(
+                    safeConfidence *
+                    10
+                );
         }
 
 
@@ -4004,1043 +4131,903 @@ function evaluateAnswer(
     }
 
 
-    /* =====================================================
-       OPEN QUESTIONS
-       ===================================================== */
+    /* =========================================================
+    NORMALIZE TEXT
+    ========================================================= */
 
-    const words =
-        cleanAnswer
-            .split(" ")
-            .filter(Boolean);
+    function normalizeText(text) {
 
+        return String(text)
 
-    const uniqueWords =
-        new Set(words);
+            .toLowerCase()
 
+            .replace(
+                /[.,!?;:'"()]/g,
+                ""
+            )
 
-    let score =
-        30;
+            .replace(
+                /\s+/g,
+                " "
+            )
 
-
-    if (
-        words.length >=
-        5
-    ) {
-
-        score +=
-            15;
+            .trim();
     }
 
 
-    if (
-        words.length >=
-        10
-    ) {
+    /* =========================================================
+    STOP RECOGNITION SAFELY
+    ========================================================= */
 
-        score +=
-            15;
-    }
+    function stopRecognitionSafely() {
 
-
-    if (
-        words.length >=
-        18
-    ) {
-
-        score +=
-            10;
-    }
-
-
-    if (
-        uniqueWords.size >=
-        6
-    ) {
-
-        score +=
-            5;
-    }
-
-
-    if (
-        uniqueWords.size >=
-        10
-    ) {
-
-        score +=
-            5;
-    }
-
-
-    const usefulWords = [
-
-        "because",
-        "important",
-        "help",
-        "helps",
-        "good",
-        "better",
-        "school",
-        "student",
-        "students",
-        "community",
-        "technology",
-        "education",
-        "communication",
-        "exercise",
-        "friend",
-        "future",
-        "leader",
-        "leadership",
-        "social",
-        "media",
-        "problem",
-        "solution",
-        "solve",
-        "improve",
-        "learning",
-        "study",
-        "studying"
-
-    ];
-
-
-    usefulWords.forEach(
-        word => {
-
-            if (
-                words.includes(
-                    word
-                )
-            ) {
-
-                score +=
-                    2;
-            }
+        if (!recognition) {
+            return;
         }
-    );
 
 
-    if (
-        safeConfidence >
-        0
-    ) {
-
-        score +=
-            Math.round(
-                safeConfidence *
-                10
-            );
-    }
-
-
-    return Math.max(
-        0,
-        Math.min(
-            100,
-            Math.round(score)
-        )
-    );
-}
-
-
-/* =========================================================
-   NORMALIZE TEXT
-   ========================================================= */
-
-function normalizeText(text) {
-
-    return String(text)
-
-        .toLowerCase()
-
-        .replace(
-            /[.,!?;:'"()]/g,
-            ""
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
-        .trim();
-}
-
-
-/* =========================================================
-   STOP RECOGNITION SAFELY
-   ========================================================= */
-
-function stopRecognitionSafely() {
-
-    if (!recognition) {
-        return;
-    }
-
-
-    pendingSubmit =
-        false;
-
-
-    try {
-
-        recognition.abort();
-
-    } catch (error) {
-
-        console.log(
-            "Recognition abort:",
-            error
-        );
-    }
-
-
-    isListening =
-        false;
-
-
-    speechStartTime =
-        0;
-}
-
-
-/* =========================================================
-   RESET LOCAL ROUND
-   ========================================================= */
-
-function resetLocalRound() {
-
-    players.player1.score =
-        0;
-
-
-    players.player1.submitted =
-        false;
-
-
-    players.player2.score =
-        0;
-
-
-    players.player2.submitted =
-        false;
-
-
-    finalTranscript =
-        "";
-
-    interimTranscript =
-        "";
-
-    pendingSubmit =
-        false;
-
-    recognitionConfidenceTotal =
-        0;
-
-    recognitionConfidenceCount =
-        0;
-
-    speechStartTime =
-        0;
-
-    speechElapsedSeconds =
-        0;
-
-
-    stopRecognitionSafely();
-
-
-    /*
-        RESET TRANSCRIPT
-    */
-
-    const transcript =
-        document.getElementById(
-            "transcript"
-        );
-
-
-    if (transcript) {
-
-        transcript.textContent =
-            "Your speech will appear here...";
-    }
-
-
-    /*
-        RESET SCORE BOX
-    */
-
-    const scoreResult =
-        document.getElementById(
-            "scoreResult"
-        );
-
-
-    const scoreValue =
-        document.getElementById(
-            "scoreValue"
-        );
-
-
-    if (scoreResult) {
-
-        scoreResult.classList.add(
-            "hidden"
-        );
-    }
-
-
-    if (scoreValue) {
-
-        scoreValue.textContent =
-            "— / 100";
-    }
-
-
-    /*
-        RESET SUBMIT BUTTON
-    */
-
-    const submitButton =
-        document.getElementById(
-            "submitButton"
-        );
-
-
-    if (submitButton) {
-
-        submitButton.disabled =
-            true;
-    }
-
-
-    /*
-        RESET SPEAK BUTTON
-    */
-
-    const speakButton =
-        document.getElementById(
-            "speakButton"
-        );
-
-
-    if (speakButton) {
-
-        speakButton.disabled =
+        pendingSubmit =
             false;
 
 
-        speakButton.classList.remove(
-            "listening"
+        try {
+
+            recognition.abort();
+
+        } catch (error) {
+
+            console.log(
+                "Recognition abort:",
+                error
+            );
+        }
+
+
+        isListening =
+            false;
+
+
+        speechStartTime =
+            0;
+    }
+
+
+    /* =========================================================
+    RESET LOCAL ROUND
+    ========================================================= */
+
+    function resetLocalRound() {
+
+        players.player1.score =
+            0;
+
+
+        players.player1.submitted =
+            false;
+
+
+        players.player2.score =
+            0;
+
+
+        players.player2.submitted =
+            false;
+
+
+        finalTranscript =
+            "";
+
+        interimTranscript =
+            "";
+
+        pendingSubmit =
+            false;
+
+        recognitionConfidenceTotal =
+            0;
+
+        recognitionConfidenceCount =
+            0;
+
+        speechStartTime =
+            0;
+
+        speechElapsedSeconds =
+            0;
+
+
+        stopRecognitionSafely();
+
+
+        /*
+            RESET TRANSCRIPT
+        */
+
+        const transcript =
+            document.getElementById(
+                "transcript"
+            );
+
+
+        if (transcript) {
+
+            transcript.textContent =
+                "Your speech will appear here...";
+        }
+
+
+        /*
+            RESET SCORE BOX
+        */
+
+        const scoreResult =
+            document.getElementById(
+                "scoreResult"
+            );
+
+
+        const scoreValue =
+            document.getElementById(
+                "scoreValue"
+            );
+
+
+        if (scoreResult) {
+
+            scoreResult.classList.add(
+                "hidden"
+            );
+        }
+
+
+        if (scoreValue) {
+
+            scoreValue.textContent =
+                "— / 100";
+        }
+
+
+        /*
+            RESET SUBMIT BUTTON
+        */
+
+        const submitButton =
+            document.getElementById(
+                "submitButton"
+            );
+
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                true;
+        }
+
+
+        /*
+            RESET SPEAK BUTTON
+        */
+
+        const speakButton =
+            document.getElementById(
+                "speakButton"
+            );
+
+
+        if (speakButton) {
+
+            speakButton.disabled =
+                false;
+
+
+            speakButton.classList.remove(
+                "listening"
+            );
+
+
+            speakButton.innerHTML =
+                "🎤<br>SPEAK";
+        }
+    }
+
+
+    /* =========================================================
+    HOST GAME UPDATE
+    ========================================================= */
+
+    function updateHostGame() {
+
+        if (
+            role !==
+            "host"
+        ) {
+
+            return;
+        }
+
+
+        const p1 =
+            players.player1;
+
+
+        const p2 =
+            players.player2;
+
+
+        const name1 =
+            document.getElementById(
+                "hostScoreName1"
+            );
+
+
+        const name2 =
+            document.getElementById(
+                "hostScoreName2"
+            );
+
+
+        if (name1) {
+
+            name1.textContent =
+                p1.name ||
+                "Player 1";
+        }
+
+
+        if (name2) {
+
+            name2.textContent =
+                p2.name ||
+                "Player 2";
+        }
+
+
+        const roundScore1 =
+            document.getElementById(
+                "hostRoundScore1"
+            );
+
+
+        const roundScore2 =
+            document.getElementById(
+                "hostRoundScore2"
+            );
+
+
+        if (roundScore1) {
+
+            roundScore1.textContent =
+                p1.submitted
+                    ? `${p1.score} / 100`
+                    : "— / 100";
+        }
+
+
+        if (roundScore2) {
+
+            roundScore2.textContent =
+                p2.submitted
+                    ? `${p2.score} / 100`
+                    : "— / 100";
+        }
+
+
+        const total1 =
+            document.getElementById(
+                "hostTotalScore1"
+            );
+
+
+        const total2 =
+            document.getElementById(
+                "hostTotalScore2"
+            );
+
+
+        if (total1) {
+
+            total1.textContent =
+                p1.total;
+        }
+
+
+        if (total2) {
+
+            total2.textContent =
+                p2.total;
+        }
+
+
+        const status1 =
+            document.getElementById(
+                "hostStatus1"
+            );
+
+
+        const status2 =
+            document.getElementById(
+                "hostStatus2"
+            );
+
+
+        if (status1) {
+
+            status1.textContent =
+                p1.submitted
+                    ? "✓ Submitted"
+                    : "🎤 Waiting for answer";
+        }
+
+
+        if (status2) {
+
+            status2.textContent =
+                p2.submitted
+                    ? "✓ Submitted"
+                    : "🎤 Waiting for answer";
+        }
+
+
+        moveCar(
+            "car1",
+            p1.position
         );
 
 
-        speakButton.innerHTML =
-            "🎤<br>SPEAK";
+        moveCar(
+            "car2",
+            p2.position
+        );
+
+
+        const nextButton =
+            document.getElementById(
+                "nextRoundButton"
+            );
+
+
+        if (!nextButton) {
+            return;
+        }
+
+
+        const bothSubmitted =
+            p1.submitted &&
+            p2.submitted;
+
+
+        nextButton.disabled =
+            !bothSubmitted;
+
+
+        if (
+            currentRound >=
+            20
+        ) {
+
+            nextButton.textContent =
+                "SHOW RESULTS";
+
+        } else {
+
+            nextButton.textContent =
+                "NEXT ROUND";
+        }
     }
-}
 
 
-/* =========================================================
-   HOST GAME UPDATE
-   ========================================================= */
+    /* =========================================================
+    CAR MOVEMENT
+    ========================================================= */
 
-function updateHostGame() {
-
-    if (
-        role !==
-        "host"
+    function moveCar(
+        id,
+        position
     ) {
 
-        return;
+        const car =
+            document.getElementById(
+                id
+            );
+
+
+        if (!car) {
+            return;
+        }
+
+
+        const safePosition =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(position) ||
+                    0
+                )
+            );
+
+
+        car.style.left =
+            `calc(${safePosition}% - 20px)`;
     }
 
 
-    const p1 =
-        players.player1;
+    /* =========================================================
+    PARTICIPANT LEADERBOARD
+    ========================================================= */
+
+    function updateParticipantLeaderboard() {
+
+        if (
+            role !==
+            "participant"
+        ) {
+
+            return;
+        }
 
 
-    const p2 =
-        players.player2;
+        const container =
+            document.getElementById(
+                "participantLeaderboard"
+            );
 
 
-    const name1 =
-        document.getElementById(
-            "hostScoreName1"
+        const standing =
+            document.getElementById(
+                "participantStanding"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        const activePlayers = [
+
+            players.player1,
+            players.player2
+
+        ].filter(
+            player =>
+                player &&
+                player.id
         );
 
 
-    const name2 =
-        document.getElementById(
-            "hostScoreName2"
-        );
+        activePlayers.sort(
+            (a, b) => {
+
+                if (
+                    b.total !==
+                    a.total
+                ) {
+
+                    return (
+                        b.total -
+                        a.total
+                    );
+                }
 
-
-    if (name1) {
-
-        name1.textContent =
-            p1.name ||
-            "Player 1";
-    }
-
-
-    if (name2) {
-
-        name2.textContent =
-            p2.name ||
-            "Player 2";
-    }
-
-
-    const roundScore1 =
-        document.getElementById(
-            "hostRoundScore1"
-        );
-
-
-    const roundScore2 =
-        document.getElementById(
-            "hostRoundScore2"
-        );
-
-
-    if (roundScore1) {
-
-        roundScore1.textContent =
-            p1.submitted
-                ? `${p1.score} / 100`
-                : "— / 100";
-    }
-
-
-    if (roundScore2) {
-
-        roundScore2.textContent =
-            p2.submitted
-                ? `${p2.score} / 100`
-                : "— / 100";
-    }
-
-
-    const total1 =
-        document.getElementById(
-            "hostTotalScore1"
-        );
-
-
-    const total2 =
-        document.getElementById(
-            "hostTotalScore2"
-        );
-
-
-    if (total1) {
-
-        total1.textContent =
-            p1.total;
-    }
-
-
-    if (total2) {
-
-        total2.textContent =
-            p2.total;
-    }
-
-
-    const status1 =
-        document.getElementById(
-            "hostStatus1"
-        );
-
-
-    const status2 =
-        document.getElementById(
-            "hostStatus2"
-        );
-
-
-    if (status1) {
-
-        status1.textContent =
-            p1.submitted
-                ? "✓ Submitted"
-                : "🎤 Waiting for answer";
-    }
-
-
-    if (status2) {
-
-        status2.textContent =
-            p2.submitted
-                ? "✓ Submitted"
-                : "🎤 Waiting for answer";
-    }
-
-
-    moveCar(
-        "car1",
-        p1.position
-    );
-
-
-    moveCar(
-        "car2",
-        p2.position
-    );
-
-
-    const nextButton =
-        document.getElementById(
-            "nextRoundButton"
-        );
-
-
-    if (!nextButton) {
-        return;
-    }
-
-
-    const bothSubmitted =
-        p1.submitted &&
-        p2.submitted;
-
-
-    nextButton.disabled =
-        !bothSubmitted;
-
-
-    if (
-        currentRound >=
-        20
-    ) {
-
-        nextButton.textContent =
-            "SHOW RESULTS";
-
-    } else {
-
-        nextButton.textContent =
-            "NEXT ROUND";
-    }
-}
-
-
-/* =========================================================
-   CAR MOVEMENT
-   ========================================================= */
-
-function moveCar(
-    id,
-    position
-) {
-
-    const car =
-        document.getElementById(
-            id
-        );
-
-
-    if (!car) {
-        return;
-    }
-
-
-    const safePosition =
-        Math.max(
-            0,
-            Math.min(
-                100,
-                Number(position) ||
-                0
-            )
-        );
-
-
-    car.style.left =
-        `calc(${safePosition}% - 20px)`;
-}
-
-
-/* =========================================================
-   PARTICIPANT LEADERBOARD
-   ========================================================= */
-
-function updateParticipantLeaderboard() {
-
-    if (
-        role !==
-        "participant"
-    ) {
-
-        return;
-    }
-
-
-    const container =
-        document.getElementById(
-            "participantLeaderboard"
-        );
-
-
-    const standing =
-        document.getElementById(
-            "participantStanding"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    const activePlayers = [
-
-        players.player1,
-        players.player2
-
-    ].filter(
-        player =>
-            player &&
-            player.id
-    );
-
-
-    activePlayers.sort(
-        (a, b) => {
-
-            if (
-                b.total !==
-                a.total
-            ) {
 
                 return (
-                    b.total -
-                    a.total
+                    b.position -
+                    a.position
                 );
             }
-
-
-            return (
-                b.position -
-                a.position
-            );
-        }
-    );
-
-
-    container.innerHTML =
-        "";
-
-
-    activePlayers.forEach(
-        (
-            player,
-            index
-        ) => {
-
-            const isYou =
-                player.id ===
-                playerId;
-
-
-            const isLeading =
-                index === 0 &&
-                activePlayers.length >
-                1;
-
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "leaderboard-player" +
-                (
-                    isLeading
-                        ? " leading"
-                        : ""
-                );
-
-
-            let medal =
-                "";
-
-
-            if (
-                index ===
-                0
-            ) {
-
-                medal =
-                    "🥇";
-
-            } else if (
-                index ===
-                1
-            ) {
-
-                medal =
-                    "🥈";
-            }
-
-
-            row.innerHTML = `
-
-                <div class="leaderboard-left">
-
-                    <div class="leaderboard-rank">
-                        ${medal || "#" + (index + 1)}
-                    </div>
-
-                    <div class="leaderboard-name">
-                        ${escapeHtml(player.name)}
-                        ${isYou ? " (YOU)" : ""}
-                    </div>
-
-                </div>
-
-                <div class="leaderboard-score">
-
-                    <div class="leaderboard-round">
-                        ${
-                            player.submitted
-                                ? player.score + " / 100 this round"
-                                : "Waiting..."
-                        }
-                    </div>
-
-                    <div class="leaderboard-total">
-                        ${player.total} pts
-                    </div>
-
-                </div>
-
-            `;
-
-
-            container.appendChild(
-                row
-            );
-        }
-    );
-
-
-    if (!standing) {
-        return;
-    }
-
-
-    const you =
-        activePlayers.find(
-            player =>
-                player.id ===
-                playerId
         );
 
 
-    if (!you) {
-
-        standing.textContent =
-            "Waiting for scores...";
+        container.innerHTML =
+            "";
 
 
-        return;
-    }
+        activePlayers.forEach(
+            (
+                player,
+                index
+            ) => {
+
+                const isYou =
+                    player.id ===
+                    playerId;
 
 
-    const highest =
-        Math.max(
-            ...activePlayers.map(
+                const isLeading =
+                    index === 0 &&
+                    activePlayers.length >
+                    1;
+
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "leaderboard-player" +
+                    (
+                        isLeading
+                            ? " leading"
+                            : ""
+                    );
+
+
+                let medal =
+                    "";
+
+
+                if (
+                    index ===
+                    0
+                ) {
+
+                    medal =
+                        "🥇";
+
+                } else if (
+                    index ===
+                    1
+                ) {
+
+                    medal =
+                        "🥈";
+                }
+
+
+                row.innerHTML = `
+
+                    <div class="leaderboard-left">
+
+                        <div class="leaderboard-rank">
+                            ${medal || "#" + (index + 1)}
+                        </div>
+
+                        <div class="leaderboard-name">
+                            ${escapeHtml(player.name)}
+                            ${isYou ? " (YOU)" : ""}
+                        </div>
+
+                    </div>
+
+                    <div class="leaderboard-score">
+
+                        <div class="leaderboard-round">
+                            ${
+                                player.submitted
+                                    ? player.score + " / 100 this round"
+                                    : "Waiting..."
+                            }
+                        </div>
+
+                        <div class="leaderboard-total">
+                            ${player.total} pts
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                container.appendChild(
+                    row
+                );
+            }
+        );
+
+
+        if (!standing) {
+            return;
+        }
+
+
+        const you =
+            activePlayers.find(
                 player =>
-                    player.total
-            )
-        );
+                    player.id ===
+                    playerId
+            );
 
 
-    const tied =
-        activePlayers.filter(
-            player =>
-                player.total ===
-                you.total
-        ).length >
-        1;
+        if (!you) {
+
+            standing.textContent =
+                "Waiting for scores...";
 
 
-    if (tied) {
-
-        standing.textContent =
-            "🤝 YOU ARE TIED!";
-
-    } else if (
-        you.total ===
-        highest
-    ) {
-
-        standing.textContent =
-            "🥇 YOU ARE LEADING!";
-
-    } else {
-
-        standing.textContent =
-            "🥈 YOU ARE IN 2ND PLACE";
-    }
-}
+            return;
+        }
 
 
-/* =========================================================
-   NEXT ROUND
-   ========================================================= */
-
-function nextRound() {
-
-    const p1 =
-        players.player1;
-
-
-    const p2 =
-        players.player2;
+        const highest =
+            Math.max(
+                ...activePlayers.map(
+                    player =>
+                        player.total
+                )
+            );
 
 
-    if (
-        !p1.submitted ||
-        !p2.submitted
-    ) {
+        const tied =
+            activePlayers.filter(
+                player =>
+                    player.total ===
+                    you.total
+            ).length >
+            1;
 
-        return;
+
+        if (tied) {
+
+            standing.textContent =
+                "🤝 YOU ARE TIED!";
+
+        } else if (
+            you.total ===
+            highest
+        ) {
+
+            standing.textContent =
+                "🥇 YOU ARE LEADING!";
+
+        } else {
+
+            standing.textContent =
+                "🥈 YOU ARE IN 2ND PLACE";
+        }
     }
 
 
-    if (
-        currentRound >=
-        20
-    ) {
+    /* =========================================================
+    NEXT ROUND
+    ========================================================= */
+
+    function nextRound() {
+
+        const p1 =
+            players.player1;
+
+
+        const p2 =
+            players.player2;
+
+
+        if (
+            !p1.submitted ||
+            !p2.submitted
+        ) {
+
+            return;
+        }
+
+
+        if (
+            currentRound >=
+            20
+        ) {
+
+            socket.send(
+                JSON.stringify({
+
+                    type:
+                        "GAME_FINISHED"
+
+                })
+            );
+
+
+            return;
+        }
+
+
+        const nextRoundNumber =
+            currentRound +
+            1;
+
 
         socket.send(
             JSON.stringify({
 
                 type:
-                    "GAME_FINISHED"
+                    "NEXT_ROUND",
+
+                round:
+                    nextRoundNumber
 
             })
         );
-
-
-        return;
     }
 
 
-    const nextRoundNumber =
-        currentRound +
-        1;
+    /* =========================================================
+    FINAL SCREEN
+    ========================================================= */
+
+    function showFinal() {
+
+        const p1 =
+            players.player1;
 
 
-    socket.send(
-        JSON.stringify({
-
-            type:
-                "NEXT_ROUND",
-
-            round:
-                nextRoundNumber
-
-        })
-    );
-}
+        const p2 =
+            players.player2;
 
 
-/* =========================================================
-   FINAL SCREEN
-   ========================================================= */
-
-function showFinal() {
-
-    const p1 =
-        players.player1;
+        let winner =
+            null;
 
 
-    const p2 =
-        players.player2;
+        if (
+            p1.total >
+            p2.total
+        ) {
+
+            winner =
+                p1;
+
+        } else if (
+            p2.total >
+            p1.total
+        ) {
+
+            winner =
+                p2;
+        }
 
 
-    let winner =
-        null;
-
-
-    if (
-        p1.total >
-        p2.total
-    ) {
-
-        winner =
-            p1;
-
-    } else if (
-        p2.total >
-        p1.total
-    ) {
-
-        winner =
-            p2;
-    }
-
-
-    const winnerName =
-        document.getElementById(
-            "winnerName"
-        );
-
-
-    const finalScore =
-        document.getElementById(
-            "finalScore"
-        );
-
-
-    const leaderboard =
-        document.getElementById(
-            "finalLeaderboard"
-        );
-
-
-    if (
-        p1.total ===
-        p2.total
-    ) {
-
-        winnerName.textContent =
-            "IT'S A TIE! 🤝";
-
-
-        finalScore.textContent =
-            `${p1.total} points each`;
-
-    } else {
-
-        winnerName.textContent =
-            winner.name;
-
-
-        finalScore.textContent =
-            `${winner.total} points`;
-    }
-
-
-    const finalPlayers = [
-
-        p1,
-        p2
-
-    ].sort(
-        (a, b) =>
-            b.total -
-            a.total
-    );
-
-
-    leaderboard.innerHTML =
-        "";
-
-
-    finalPlayers.forEach(
-        (
-            player,
-            index
-        ) => {
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "leaderboard-player";
-
-
-            row.innerHTML = `
-
-                <div class="leaderboard-left">
-
-                    <div class="leaderboard-rank">
-                        ${
-                            index === 0
-                                ? "🥇"
-                                : "🥈"
-                        }
-                    </div>
-
-                    <div class="leaderboard-name">
-                        ${escapeHtml(player.name)}
-                    </div>
-
-                </div>
-
-                <div class="leaderboard-score">
-
-                    <div class="leaderboard-total">
-                        ${player.total} pts
-                    </div>
-
-                </div>
-
-            `;
-
-
-            leaderboard.appendChild(
-                row
+        const winnerName =
+            document.getElementById(
+                "winnerName"
             );
+
+
+        const finalScore =
+            document.getElementById(
+                "finalScore"
+            );
+
+
+        const leaderboard =
+            document.getElementById(
+                "finalLeaderboard"
+            );
+
+
+        if (
+            p1.total ===
+            p2.total
+        ) {
+
+            winnerName.textContent =
+                "IT'S A TIE! 🤝";
+
+
+            finalScore.textContent =
+                `${p1.total} points each`;
+
+        } else {
+
+            winnerName.textContent =
+                winner.name;
+
+
+            finalScore.textContent =
+                `${winner.total} points`;
         }
-    );
 
 
-    showScreen(
-        "finalScreen"
-    );
-}
+        const finalPlayers = [
+
+            p1,
+            p2
+
+        ].sort(
+            (a, b) =>
+                b.total -
+                a.total
+        );
 
 
-/* =========================================================
-   ESCAPE HTML
-   ========================================================= */
+        leaderboard.innerHTML =
+            "";
 
-        function escapeHtml(text) {
 
-            return String(text)
+        finalPlayers.forEach(
+            (
+                player,
+                index
+            ) => {
 
-                .replace(
-                    /&/g,
-                    "&amp;"
-                )
+                const row =
+                    document.createElement(
+                        "div"
+                    );
 
-                .replace(
-                    /</g,
-                    "&lt;"
-                )
 
-                .replace(
-                    />/g,
-                    "&gt;"
-                )
+                row.className =
+                    "leaderboard-player";
 
-                .replace(
-                    /"/g,
-                    "&quot;"
-                )
 
-                .replace(
-                    /'/g,
-                    "&#039;"
+                row.innerHTML = `
+
+                    <div class="leaderboard-left">
+
+                        <div class="leaderboard-rank">
+                            ${
+                                index === 0
+                                    ? "🥇"
+                                    : "🥈"
+                            }
+                        </div>
+
+                        <div class="leaderboard-name">
+                            ${escapeHtml(player.name)}
+                        </div>
+
+                    </div>
+
+                    <div class="leaderboard-score">
+
+                        <div class="leaderboard-total">
+                            ${player.total} pts
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                leaderboard.appendChild(
+                    row
                 );
-        }
+            }
+        );
 
-        </script>
 
-    </body>
+        showScreen(
+            "finalScreen"
+        );
+    }
 
-</html>
+
+    /* =========================================================
+    ESCAPE HTML
+    ========================================================= */
+
+            function escapeHtml(text) {
+
+                return String(text)
+
+                    .replace(
+                        /&/g,
+                        "&amp;"
+                    )
+
+                    .replace(
+                        /</g,
+                        "&lt;"
+                    )
+
+                    .replace(
+                        />/g,
+                        "&gt;"
+                    )
+
+                    .replace(
+                        /"/g,
+                        "&quot;"
+                    )
+
+                    .replace(
+                        /'/g,
+                        "&#039;"
+                    );
+            }
+
+            </script>
+
+        </body>
+
+    </html>
