@@ -454,6 +454,41 @@
             white-space: pre-wrap;
         }
 
+        .transcript-section {
+    margin-top: 25px;
+}
+
+        .transcript-label {
+            text-align: left;
+            font-size: 14px;
+            font-weight: 900;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .score-result {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 18px;
+            background: #eef2ff;
+            text-align: center;
+            border: 2px solid #c7d2fe;
+        }
+
+        .score-result-label {
+            font-size: 13px;
+            font-weight: 900;
+            color: #64748b;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .score-result-value {
+            font-size: 38px;
+            font-weight: 900;
+            color: #4f46e5;
+        }
+
 
         .submit-button {
 
@@ -1264,12 +1299,37 @@
             </button>
 
 
+            <div class="transcript-section">
+
+            <div class="transcript-label">
+        🎤      YOUR SPEECH
+            </div>
+
             <div
                 id="transcript"
                 class="transcript"
             >
                 Your speech will appear here...
             </div>
+
+        </div>
+
+
+        <div
+            id="scoreResult"
+            class="score-result hidden"
+>
+        <div class="score-result-label">
+            SCORE
+        </div>
+
+        <div
+            id="scoreValue"
+            class="score-result-value"
+        >
+            — / 100
+        </div>
+        </div>
 
 
             <button
@@ -1559,8 +1619,6 @@
 
 </section>
 
-
-
 <script>
 
 /* =========================================================
@@ -1571,7 +1629,6 @@ const protocol =
     location.protocol === "https:"
         ? "wss:"
         : "ws:";
-
 
 const socket =
     new WebSocket(
@@ -1584,15 +1641,10 @@ const socket =
    ========================================================= */
 
 let role = null;
-
 let roomCode = null;
-
 let playerId = null;
-
 let playerSlot = null;
-
 let playerName = null;
-
 let currentRound = 1;
 
 
@@ -1601,47 +1653,17 @@ let currentRound = 1;
    ========================================================= */
 
 let isListening = false;
-
 let recognition = null;
-
 let pendingSubmit = false;
 
-
-/*
-    FINAL TRANSCRIPT
-
-    This contains only speech that the browser
-    has finalized.
-
-    Interim speech is NOT submitted.
-*/
-
 let finalTranscript = "";
-
 let interimTranscript = "";
 
-
-/*
-    Browser speech recognition confidence.
-
-    This is NOT true pronunciation analysis.
-*/
-
 let recognitionConfidenceTotal = 0;
-
 let recognitionConfidenceCount = 0;
-
 let microphonePermissionGranted = false;
 
-
-/*
-    SPEECH TIMER
-
-    Measures how long the player was actually speaking.
-*/
-
 let speechStartTime = 0;
-
 let speechElapsedSeconds = 0;
 
 
@@ -1654,32 +1676,21 @@ let players = {
     player1: {
 
         id: null,
-
         name: "",
-
         score: 0,
-
         total: 0,
-
         position: 0,
-
         submitted: false
 
     },
 
-
     player2: {
 
         id: null,
-
         name: "",
-
         score: 0,
-
         total: 0,
-
         position: 0,
-
         submitted: false
 
     }
@@ -1838,7 +1849,7 @@ const challenges = [
     },
 
 
-    // 💀 LEVEL 5 — C1 MASTERY / FINAL CHALLENGE
+    // 💀 LEVEL 5 — FINAL CHALLENGE
 
     {
         text: "Although technologically sophisticated speech-recognition applications can facilitate remarkably accurate transcription, their responsible implementation necessitates careful consideration of linguistic nuances, contextual interpretation, privacy vulnerabilities, and the irreplaceable significance of authentic human communication.",
@@ -2122,10 +2133,6 @@ socket.addEventListener(
         );
 
 
-        /* =================================================
-           ROOM CREATED
-           ================================================= */
-
         if (
             message.type ===
             "ROOM_CREATED"
@@ -2161,10 +2168,6 @@ socket.addEventListener(
             return;
         }
 
-
-        /* =================================================
-           JOINED ROOM
-           ================================================= */
 
         if (
             message.type ===
@@ -2217,10 +2220,6 @@ socket.addEventListener(
         }
 
 
-        /* =================================================
-           ROOM UPDATED
-           ================================================= */
-
         if (
             message.type ===
             "ROOM_UPDATED"
@@ -2239,10 +2238,6 @@ socket.addEventListener(
             return;
         }
 
-
-        /* =================================================
-           GAME STARTED
-           ================================================= */
 
         if (
             message.type ===
@@ -2292,10 +2287,6 @@ socket.addEventListener(
         }
 
 
-        /* =================================================
-           SCORE UPDATE
-           ================================================= */
-
         if (
             message.type ===
             "SCORE_UPDATE"
@@ -2309,10 +2300,6 @@ socket.addEventListener(
             return;
         }
 
-
-        /* =================================================
-           NEXT ROUND
-           ================================================= */
 
         if (
             message.type ===
@@ -2351,10 +2338,6 @@ socket.addEventListener(
         }
 
 
-        /* =================================================
-           GAME FINISHED
-           ================================================= */
-
         if (
             message.type ===
             "GAME_FINISHED"
@@ -2374,10 +2357,6 @@ socket.addEventListener(
             return;
         }
 
-
-        /* =================================================
-           PLAYER DISCONNECTED
-           ================================================= */
 
         if (
             message.type ===
@@ -2411,10 +2390,6 @@ socket.addEventListener(
         }
 
 
-        /* =================================================
-           HOST DISCONNECTED
-           ================================================= */
-
         if (
             message.type ===
             "HOST_DISCONNECTED"
@@ -2431,10 +2406,6 @@ socket.addEventListener(
             return;
         }
 
-
-        /* =================================================
-           SERVER ERROR
-           ================================================= */
 
         if (
             message.type ===
@@ -2627,23 +2598,12 @@ function applyScoreState(state) {
 
             players.player1 = {
 
-                id:
-                    null,
-
-                name:
-                    "",
-
-                score:
-                    0,
-
-                total:
-                    0,
-
-                position:
-                    0,
-
-                submitted:
-                    false
+                id: null,
+                name: "",
+                score: 0,
+                total: 0,
+                position: 0,
+                submitted: false
 
             };
         }
@@ -2687,23 +2647,12 @@ function applyScoreState(state) {
 
             players.player2 = {
 
-                id:
-                    null,
-
-                name:
-                    "",
-
-                score:
-                    0,
-
-                total:
-                    0,
-
-                position:
-                    0,
-
-                submitted:
-                    false
+                id: null,
+                name: "",
+                score: 0,
+                total: 0,
+                position: 0,
+                submitted: false
 
             };
         }
@@ -2968,19 +2917,9 @@ if (SpeechRecognition) {
         "en-US";
 
 
-    /*
-        Continuous recognition allows the player
-        to speak a complete sentence.
-    */
-
     recognition.continuous =
         true;
 
-
-    /*
-        Interim results allow the player
-        to see their speech while talking.
-    */
 
     recognition.interimResults =
         true;
@@ -3000,11 +2939,6 @@ if (SpeechRecognition) {
             isListening =
                 true;
 
-
-            /*
-                Start timing when the browser
-                actually begins recognition.
-            */
 
             speechStartTime =
                 performance.now();
@@ -3052,7 +2986,7 @@ if (SpeechRecognition) {
                     event.resultIndex;
 
                 i <
-                    event.results.length;
+                event.results.length;
 
                 i++
             ) {
@@ -3108,26 +3042,12 @@ if (SpeechRecognition) {
 
                 } else {
 
-                    /*
-                        IMPORTANT:
-
-                        Interim speech is only
-                        temporary browser prediction.
-
-                        We replace it instead of
-                        appending it.
-                    */
-
                     interimParts.push(
                         text
                     );
                 }
             }
 
-
-            /*
-                Add ONLY newly finalized speech.
-            */
 
             if (
                 finalParts.length >
@@ -3148,10 +3068,6 @@ if (SpeechRecognition) {
             }
 
 
-            /*
-                Replace previous interim result.
-            */
-
             interimTranscript =
                 interimParts
                     .join(" ")
@@ -3161,11 +3077,6 @@ if (SpeechRecognition) {
                     )
                     .trim();
 
-
-            /*
-                Display both final and current
-                interim speech.
-            */
 
             const displayText =
                 (
@@ -3243,10 +3154,7 @@ if (SpeechRecognition) {
                     "Microphone access was blocked. Please allow microphone access for SpeakUp in your browser settings."
                 );
 
-            }
-
-
-            else if (
+            } else if (
                 event.error ===
                 "audio-capture"
             ) {
@@ -3255,10 +3163,7 @@ if (SpeechRecognition) {
                     "No microphone could be detected. Please check your microphone."
                 );
 
-            }
-
-
-            else if (
+            } else if (
                 event.error ===
                 "no-speech"
             ) {
@@ -3267,10 +3172,7 @@ if (SpeechRecognition) {
                     "No speech detected."
                 );
 
-            }
-
-
-            else if (
+            } else if (
                 event.error ===
                 "network"
             ) {
@@ -3288,11 +3190,6 @@ if (SpeechRecognition) {
 
     recognition.onend =
         () => {
-
-            /*
-                Save total speaking time before
-                resetting the listening state.
-            */
 
             if (
                 speechStartTime >
@@ -3329,12 +3226,6 @@ if (SpeechRecognition) {
             }
 
 
-            /*
-                If STOP was pressed, wait briefly
-                for the browser to finalize the
-                last speech result before submitting.
-            */
-
             if (
                 pendingSubmit
             ) {
@@ -3368,11 +3259,6 @@ if (SpeechRecognition) {
 
 async function ensureMicrophonePermission() {
 
-    /*
-        If permission has already been granted
-        during this page session, don't ask again.
-    */
-
     if (
         microphonePermissionGranted
     ) {
@@ -3380,10 +3266,6 @@ async function ensureMicrophonePermission() {
         return true;
     }
 
-
-    /*
-        Try the Permissions API first.
-    */
 
     if (
         navigator.permissions &&
@@ -3435,10 +3317,6 @@ async function ensureMicrophonePermission() {
     }
 
 
-    /*
-        Ask for microphone access.
-    */
-
     if (
         navigator.mediaDevices &&
         navigator.mediaDevices.getUserMedia
@@ -3487,11 +3365,6 @@ async function ensureMicrophonePermission() {
     }
 
 
-    /*
-        SpeechRecognition may still work even if
-        getUserMedia is unavailable.
-    */
-
     return true;
 }
 
@@ -3522,10 +3395,6 @@ async function toggleListening() {
     }
 
 
-    /*
-        STOP
-    */
-
     if (isListening) {
 
         pendingSubmit =
@@ -3553,10 +3422,6 @@ async function toggleListening() {
     }
 
 
-    /*
-        START
-    */
-
     await startListening();
 }
 
@@ -3567,36 +3432,23 @@ async function toggleListening() {
 
 async function startListening() {
 
-    /*
-        Start with a completely clean answer.
-    */
-
     finalTranscript =
         "";
 
     interimTranscript =
         "";
 
-
     recognitionConfidenceTotal =
         0;
-
 
     recognitionConfidenceCount =
         0;
 
-
     pendingSubmit =
         false;
 
-
-    /*
-        Reset timer.
-    */
-
     speechStartTime =
         0;
-
 
     speechElapsedSeconds =
         0;
@@ -3628,10 +3480,6 @@ async function startListening() {
     }
 
 
-    /*
-        Make sure microphone permission exists.
-    */
-
     const microphoneReady =
         await ensureMicrophonePermission();
 
@@ -3655,10 +3503,6 @@ async function startListening() {
             "Listening...";
     }
 
-
-    /*
-        Start SpeechRecognition.
-    */
 
     try {
 
@@ -3695,8 +3539,6 @@ function submitAnswer() {
 
     /*
         ONLY FINALIZED SPEECH IS USED.
-
-        Interim predictions are ignored.
     */
 
     const text =
@@ -3805,6 +3647,10 @@ function submitAnswer() {
     }
 
 
+    /*
+        KEEP TRANSCRIPT CLEAN.
+    */
+
     const transcript =
         document.getElementById(
             "transcript"
@@ -3814,7 +3660,38 @@ function submitAnswer() {
     if (transcript) {
 
         transcript.textContent =
-            `${text}\n\nScore submitted: ${score}/100`;
+            text;
+    }
+
+
+    /*
+        SHOW SCORE IN ITS OWN BOX.
+    */
+
+    const scoreResult =
+        document.getElementById(
+            "scoreResult"
+        );
+
+
+    const scoreValue =
+        document.getElementById(
+            "scoreValue"
+        );
+
+
+    if (scoreResult) {
+
+        scoreResult.classList.remove(
+            "hidden"
+        );
+    }
+
+
+    if (scoreValue) {
+
+        scoreValue.textContent =
+            `${score} / 100`;
     }
 }
 
@@ -3843,10 +3720,6 @@ function evaluateAnswer(
         return 0;
     }
 
-
-    /*
-        Keep confidence between 0 and 1.
-    */
 
     const safeConfidence =
         Math.max(
@@ -3888,22 +3761,6 @@ function evaluateAnswer(
         }
 
 
-        /* =================================================
-           ORDERED WORD ACCURACY
-           =================================================
-
-           Levenshtein distance compares the
-           complete word sequence.
-
-           It detects:
-
-           ✓ missing words
-           ✓ extra words
-           ✓ repeated words
-           ✓ wrong word order
-           ✓ wrong words
-        */
-
         const rows =
             questionWords.length +
             1;
@@ -3928,10 +3785,6 @@ function evaluateAnswer(
             );
 
 
-        /*
-            Deletion cost.
-        */
-
         for (
             let i = 0;
             i < rows;
@@ -3943,10 +3796,6 @@ function evaluateAnswer(
         }
 
 
-        /*
-            Insertion cost.
-        */
-
         for (
             let j = 0;
             j < columns;
@@ -3957,10 +3806,6 @@ function evaluateAnswer(
                 j;
         }
 
-
-        /*
-            Compare every word.
-        */
 
         for (
             let i = 1;
@@ -3997,31 +3842,17 @@ function evaluateAnswer(
                     matrix[i][j] =
                         Math.min(
 
-                            /*
-                                Delete expected word.
-                            */
-
                             matrix[
                                 i - 1
                             ][
                                 j
                             ] + 1,
 
-
-                            /*
-                                Insert extra answer word.
-                            */
-
                             matrix[
                                 i
                             ][
                                 j - 1
                             ] + 1,
-
-
-                            /*
-                                Replace wrong word.
-                            */
 
                             matrix[
                                 i - 1
@@ -4042,13 +3873,6 @@ function evaluateAnswer(
                 columns - 1
             ];
 
-
-        /*
-            Compare against the longer length.
-
-            This is important because extra words
-            must also hurt the score.
-        */
 
         const comparisonLength =
             Math.max(
@@ -4077,7 +3901,10 @@ function evaluateAnswer(
            ================================================= */
 
         const accuracyScore =
-            Math.pow(sequenceSimilarity, 0.65) * 300;
+            Math.pow(
+                sequenceSimilarity,
+                0.65
+            ) * 300;
 
 
         /* =================================================
@@ -4135,13 +3962,6 @@ function evaluateAnswer(
             );
 
 
-        /*
-            SPEED CANNOT SAVE A BAD ANSWER.
-
-            If the player got less than 50%
-            sequence accuracy, remove the speed bonus.
-        */
-
         if (
             sequenceSimilarity <
             0.50
@@ -4161,15 +3981,6 @@ function evaluateAnswer(
             confidenceScore +
             speedScore;
 
-
-        /*
-            Exact transcript gets the full
-            80 accuracy points.
-
-            We don't automatically give 100 because
-            a correct transcript does not prove perfect
-            pronunciation.
-        */
 
         if (
             cleanAnswer ===
@@ -4264,57 +4075,31 @@ function evaluateAnswer(
     const usefulWords = [
 
         "because",
-
         "important",
-
         "help",
-
         "helps",
-
         "good",
-
         "better",
-
         "school",
-
         "student",
-
         "students",
-
         "community",
-
         "technology",
-
         "education",
-
         "communication",
-
         "exercise",
-
         "friend",
-
         "future",
-
         "leader",
-
         "leadership",
-
         "social",
-
         "media",
-
         "problem",
-
         "solution",
-
         "solve",
-
         "improve",
-
         "learning",
-
         "study",
-
         "studying"
 
     ];
@@ -4442,37 +4227,23 @@ function resetLocalRound() {
         false;
 
 
-    /*
-        Completely clear speech state.
-    */
-
     finalTranscript =
         "";
-
 
     interimTranscript =
         "";
 
-
     pendingSubmit =
         false;
-
 
     recognitionConfidenceTotal =
         0;
 
-
     recognitionConfidenceCount =
         0;
 
-
-    /*
-        Reset timer.
-    */
-
     speechStartTime =
         0;
-
 
     speechElapsedSeconds =
         0;
@@ -4480,6 +4251,10 @@ function resetLocalRound() {
 
     stopRecognitionSafely();
 
+
+    /*
+        RESET TRANSCRIPT
+    */
 
     const transcript =
         document.getElementById(
@@ -4494,6 +4269,41 @@ function resetLocalRound() {
     }
 
 
+    /*
+        RESET SCORE BOX
+    */
+
+    const scoreResult =
+        document.getElementById(
+            "scoreResult"
+        );
+
+
+    const scoreValue =
+        document.getElementById(
+            "scoreValue"
+        );
+
+
+    if (scoreResult) {
+
+        scoreResult.classList.add(
+            "hidden"
+        );
+    }
+
+
+    if (scoreValue) {
+
+        scoreValue.textContent =
+            "— / 100";
+    }
+
+
+    /*
+        RESET SUBMIT BUTTON
+    */
+
     const submitButton =
         document.getElementById(
             "submitButton"
@@ -4506,6 +4316,10 @@ function resetLocalRound() {
             true;
     }
 
+
+    /*
+        RESET SPEAK BUTTON
+    */
 
     const speakButton =
         document.getElementById(
@@ -4786,7 +4600,6 @@ function updateParticipantLeaderboard() {
     const activePlayers = [
 
         players.player1,
-
         players.player2
 
     ].filter(
@@ -5121,7 +4934,6 @@ function showFinal() {
     const finalPlayers = [
 
         p1,
-
         p2
 
     ].sort(
@@ -5197,38 +5009,38 @@ function showFinal() {
    ESCAPE HTML
    ========================================================= */
 
-function escapeHtml(text) {
+        function escapeHtml(text) {
 
-    return String(text)
+            return String(text)
 
-        .replace(
-            /&/g,
-            "&amp;"
-        )
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
 
-        .replace(
-            /</g,
-            "&lt;"
-        )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
 
-        .replace(
-            />/g,
-            "&gt;"
-        )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
 
-        .replace(
-            /"/g,
-            "&quot;"
-        )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
 
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-}
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+        }
 
-</script>
+        </script>
 
-</body>
+    </body>
 
 </html>
